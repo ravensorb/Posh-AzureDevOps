@@ -15,6 +15,14 @@ function AzdoAdd-VariableGroupVariable()
     )
     BEGIN
     {
+        # Write-Host "Importing Variable into Azure DevOps Variable Groups" -ForegroundColor Green
+        # Write-Host "`tProject: $ProjectUrl" -ForegroundColor Green
+        # Write-Host "`tVariable Group: $VariableGroupName" -ForegroundColor Green
+        # Write-Host "`tVariable: $VariableName = $VariableValue" -ForegroundColor Green
+        # Write-Host "`tIs Variable a Secret: $Secret" -ForegroundColor Green
+        # Write-Host "`tCreate Variable Group If doesn't Exists: $Force" -ForegroundColor Green
+        # Write-Host "`tClear Variable Group before importing: $Reset" -ForegroundColor Green
+
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
 
@@ -68,7 +76,7 @@ function AzdoAdd-VariableGroupVariable()
         Write-Verbose $body
         $response = Invoke-RestMethod $restApi -Method $method -Body $body -ContentType 'application/json' -Header $headers
         
-        return $response.id
+        #return $response.id        
     }
 }
 
