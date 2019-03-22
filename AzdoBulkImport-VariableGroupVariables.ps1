@@ -13,6 +13,14 @@ function AzdoBulkImport-VariableGroupVariables()
     )
     BEGIN
     {
+        Write-Host "Importing Variables into Azure DevOps Variable Groups" -ForegroundColor Green
+        Write-Host "`tProject: $ProjectUrl" -ForegroundColor Yellow
+        Write-Host "`tCSV File: $csvFile" -ForegroundColor Yellow
+        Write-Host "`tVariable Group: $VariableGroupName" -ForegroundColor Yellow
+        Write-Host "`tEnvrionment Name: $EnvironmentNameFilter" -ForegroundColor Yellow
+        Write-Host "`tCreate Variable Group If doesn't Exists: $Force" -ForegroundColor Yellow
+        Write-Host "`tClear Variable Group before importing: $Reset" -ForegroundColor Yellow
+
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
@@ -38,6 +46,8 @@ function AzdoBulkImport-VariableGroupVariables()
 
         # Note: We only want to run the reset once no matter what so we clear it after the first loop
         $variables | % { AzdoAdd-VariableGroupVariable -ProjectUrl $ProjectUrl -PAT $PAT -VariableGroupName $VariableGroupName -VariableName $($_.Name) -VariableValue $($_.Value) -Secret $($_.Secret) -Force:$Force -Reset:$Reset; $Reset = $null }       
+
+        Write-Host "`tImported $($variables.Count) variables" -ForegroundColor Green
     }
     END { }
 }
