@@ -1,4 +1,4 @@
-function Add-AzDoVariableGroupVariable()
+function Add-AzDoLibraryVariable()
 {
     [CmdletBinding()]
     param
@@ -15,6 +15,8 @@ function Add-AzDoVariableGroupVariable()
     )
     BEGIN
     {
+       if (-Not (Test-Path variable:global:AzDoApiVersion)) { $global:AzDoApiVersion = "5.0"}
+
         # Write-Host "Importing Variable into Azure DevOps Variable Groups" -ForegroundColor Green
         # Write-Host "`tProject: $ProjectUrl" -ForegroundColor Green
         # Write-Host "`tVariable Group: $VariableGroupName" -ForegroundColor Green
@@ -54,7 +56,7 @@ function Add-AzDoVariableGroupVariable()
             {
                 Write-Verbose "Create variable group $VariableGroupName."
                 $variableGroup = @{name=$VariableGroupName;description=$VariableGroupDescription;variables=New-Object PSObject;}
-                $restApi = "$($ProjectUrl)/_apis/distributedtask/variablegroups?api-version=3.2-preview.1"
+                $restApi = "$($ProjectUrl)/_apis/distributedtask/variablegroups?api-version=$($global:AzDoApiVersion)"
             }
             else
             {
@@ -69,7 +71,7 @@ function Add-AzDoVariableGroupVariable()
     }
     END
     {
-        $headers = Get-HttpHeader -pat $PAT 
+        $headers = Get-AzDoHttpHeader -pat $PAT 
 
         Write-Verbose "Persist variable group $VariableGroupName."
         $body = $variableGroup | ConvertTo-Json -Depth 10 -Compress
@@ -97,7 +99,7 @@ function Get-VariableGroup()
     }
     PROCESS
     {
-        $headers = Get-HttpHeader -PAT $PAT 
+        $headers = Get-AzDoHttpHeader -PAT $PAT 
 
         $ProjectUrl = $ProjectUrl.TrimEnd("/")
         $url = "$($ProjectUrl)/_apis/distributedtask/variablegroups"
@@ -115,39 +117,4 @@ function Get-VariableGroup()
         return $null
     }
     END { }
-}
-
-function Get-HttpHeader()
-{
-    [CmdletBinding()]
-    param
-    (
-        [string]$PAT
-    )
-    BEGIN 
-    {
-        Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
-        Write-Verbose "Parameter Values"
-        $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
-    }
-    PROCESS
-    {
-        $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-        # Base64-encodes the Personal Access Token (PAT) appropriately
-        if (-Not [string]::IsNullOrEmpty($PAT)) {
-            Write-Verbose "Creating HTTP Auth Header for PAT"
-            $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes((":$PAT")))
-            Write-Verbose $base64AuthInfo
-            $headers.Add("Authorization", ("Basic {0}" -f $base64AuthInfo))
-        }
-        $headers.Add("Accept", "application/json;api-version=3.2-preview.1")
-    
-        Write-Verbose $headers
-
-        return $headers   
-    }
-    END
-    {
-
-    }
 }

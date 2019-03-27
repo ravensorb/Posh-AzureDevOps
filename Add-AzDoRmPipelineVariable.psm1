@@ -1,4 +1,4 @@
-function Add-AzDoPipelineVariable()
+function Add-AzDoRmPipelineVariable()
 {
     [CmdletBinding()]
     param
@@ -16,7 +16,9 @@ function Add-AzDoPipelineVariable()
     )
     BEGIN
     {
-        $headers = Get-HttpHeader $PAT 
+        if (-Not (Test-Path variable:global:AzDoApiVersion)) { $global:AzDoApiVersion = "5.0"}
+
+        $headers = Get-AzDoHttpHeader $PAT 
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
@@ -24,7 +26,7 @@ function Add-AzDoPipelineVariable()
 
         $ProjectUrl = $ProjectUrl.TrimEnd("/")
 
-        $url = "$($ProjectUrl)/_apis/release/definitions/$($DefinitionId)?expand=Environments?api-version=3.0-preview"
+        $url = "$($ProjectUrl)/_apis/release/definitions/$($DefinitionId)?expand=Environments?api-version=$($global:AzDoApiVersion)"
         $definition = Invoke-RestMethod $url -Headers $headers
 
         if ($Reset)
@@ -94,41 +96,7 @@ function Add-AzDoPipelineVariable()
 
         $body = $definition | ConvertTo-Json -Depth 10 -Compress
 
-        Invoke-RestMethod "$($ProjectUrl)/_apis/release/definitions?api-version=3.0-preview" -Method Put -Body $body -ContentType 'application/json' -Headers $headers | Out-Null
+        Invoke-RestMethod "$($ProjectUrl)/_apis/release/definitions?api-version=$($global:AzDoApiVersion)" -Method Put -Body $body -ContentType 'application/json' -Headers $headers | Out-Null
     }
 }
 
-function Get-HttpHeader()
-{
-    [CmdletBinding()]
-    param
-    (
-        [string]$PAT
-    )
-    BEGIN 
-    {
-        Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
-        Write-Verbose "Parameter Values"
-        $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
-    }
-    PROCESS
-    {
-        $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-        # Base64-encodes the Personal Access Token (PAT) appropriately
-        if (-Not [string]::IsNullOrEmpty($PAT)) {
-            Write-Verbose "Creating HTTP Auth Header for PAT"
-            $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes((":$PAT")))
-            Write-Verbose $base64AuthInfo
-            $headers.Add("Authorization", ("Basic {0}" -f $base64AuthInfo))
-        }
-        $headers.Add("Accept", "application/json;api-version=3.2-preview.1")
-    
-        Write-Verbose $headers
-
-        return $headers   
-    }
-    END
-    {
-
-    }
-}

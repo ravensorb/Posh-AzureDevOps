@@ -1,4 +1,4 @@
-function Import-AzDoVariableGroupVariables()
+function Import-AzLibraryVariables()
 {
     [CmdletBinding()]
     param
@@ -13,6 +13,8 @@ function Import-AzDoVariableGroupVariables()
     )
     BEGIN
     {
+        if (-Not (Test-Path variable:global:AzDoApiVersion)) { $global:AzDoApiVersion = "5.0"}
+                
         Write-Host "Importing Variables into Azure DevOps Variable Groups" -ForegroundColor Green
         Write-Host "`tProject: $ProjectUrl" -ForegroundColor Yellow
         Write-Host "`tCSV File: $csvFile" -ForegroundColor Yellow
