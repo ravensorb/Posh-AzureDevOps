@@ -1,4 +1,4 @@
-function AzdoBulkImport-VariableGroupVariables()
+function Import-AzDoVariableGroupVariables()
 {
     [CmdletBinding()]
     param
@@ -51,3 +51,4 @@ function AzdoBulkImport-VariableGroupVariables()
     }
     END { }
 }
+

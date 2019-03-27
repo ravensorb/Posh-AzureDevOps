@@ -1,4 +1,4 @@
-function AzdoAdd-VariableGroupVariable()
+function Add-AzDoVariableGroupVariable()
 {
     [CmdletBinding()]
     param
