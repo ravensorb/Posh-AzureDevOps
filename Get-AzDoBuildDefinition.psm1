@@ -6,11 +6,12 @@ function Get-AzDoBuildDefinition()
         [string][parameter(Mandatory = $true)]$ProjectUrl,
         [string]$Name,
         [int]$Id,
-        [string]$PAT
+        [string]$PAT,
+        [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
     {
-        if (-Not (Test-Path variable:global:AzDoApiVersion)) { $global:AzDoApiVersion = "5.0"}
+       if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
         if ($Id -eq $null -and [string]::IsNullOrEmpty($Name)) { Write-Error "Definition ID or Name must be specified"; Exit;}
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -19,15 +20,15 @@ function Get-AzDoBuildDefinition()
     }
     PROCESS
     {
-        $headers = Get-AzDoHttpHeader -PAT $PAT 
+        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
 
         if ($Id -ne $null -and $Id -ne 0) 
         {
-            $url = "$($ProjectUrl)/_apis/build/definitions/$($Id)?api-version=$($global:AzDoApiVersion)"
+            $url = "$($ProjectUrl)/_apis/build/definitions/$($Id)?api-version=$($ApiVersion)"
         }
         else 
         {
-            $url = "$($ProjectUrl)/_apis/build/definitions?api-version=$($global:AzDoApiVersion)&searchText=$Name"
+            $url = "$($ProjectUrl)/_apis/build/definitions?api-version=$($ApiVersion)&searchText=$Name"
         }
 
         $buildDefinitions = Invoke-RestMethod $url -Headers $headers 

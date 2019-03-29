@@ -7,3 +7,6 @@ foreach ( $item in $scripts ) {
     Write-Host "`tLoading $($item.Name)" -ForegroundColor Yellow
     Import-Module -Name $item.FullName -Force
 }
+
+Write-Host "Setting Azure DevOps Global variables" -ForegroundColor Green
+Set-AzDoGlobalVariables

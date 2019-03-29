@@ -11,11 +11,12 @@ function Add-AzDoLibraryVariable()
         [bool][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$Secret,
         [string]$PAT,
         [switch]$Reset,
-        [switch]$Force
+        [switch]$Force,
+        [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
     {
-       if (-Not (Test-Path variable:global:AzDoApiVersion)) { $global:AzDoApiVersion = "5.0"}
+       if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1"}
 
         # Write-Host "Importing Variable into Azure DevOps Variable Groups" -ForegroundColor Green
         # Write-Host "`tProject: $ProjectUrl" -ForegroundColor Green
@@ -30,7 +31,7 @@ function Add-AzDoLibraryVariable()
 
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
         $method = "Post"
-        $variableGroup = Get-VariableGroup $ProjectUrl $VariableGroupName -PAT $PAT
+        $variableGroup = Get-AzDoLibraryVariableGroup $ProjectUrl $VariableGroupName -PAT $PAT -ApiVersion $ApiVersion
 
         if($variableGroup)
         {
@@ -46,7 +47,7 @@ function Add-AzDoLibraryVariable()
             }
 
             $id = $variableGroup.id
-            $restApi = "$($ProjectUrl)/_apis/distributedtask/variablegroups/$id"
+            $restApi = "$($ProjectUrl)/_apis/distributedtask/variablegroups/$($id)?api-version=$($ApiVersion)"
             $method = "Put"
         }
         else
@@ -56,7 +57,7 @@ function Add-AzDoLibraryVariable()
             {
                 Write-Verbose "Create variable group $VariableGroupName."
                 $variableGroup = @{name=$VariableGroupName;description=$VariableGroupDescription;variables=New-Object PSObject;}
-                $restApi = "$($ProjectUrl)/_apis/distributedtask/variablegroups?api-version=$($global:AzDoApiVersion)"
+                $restApi = "$($ProjectUrl)/_apis/distributedtask/variablegroups?api-version=$($ApiVersion)"
             }
             else
             {
@@ -71,7 +72,7 @@ function Add-AzDoLibraryVariable()
     }
     END
     {
-        $headers = Get-AzDoHttpHeader -pat $PAT 
+        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
 
         Write-Verbose "Persist variable group $VariableGroupName."
         $body = $variableGroup | ConvertTo-Json -Depth 10 -Compress
@@ -80,41 +81,4 @@ function Add-AzDoLibraryVariable()
         
         #return $response.id        
     }
-}
-
-function Get-VariableGroup()
-{
-    [CmdletBinding()]
-    param
-    (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [string][parameter(Mandatory = $true)]$Name,
-        [string]$PAT
-    )
-    BEGIN
-    {
-        Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
-        Write-Verbose "Parameter Values"
-        $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
-    }
-    PROCESS
-    {
-        $headers = Get-AzDoHttpHeader -PAT $PAT 
-
-        $ProjectUrl = $ProjectUrl.TrimEnd("/")
-        $url = "$($ProjectUrl)/_apis/distributedtask/variablegroups"
-        $variableGroups = Invoke-RestMethod $url -Headers $headers 
-        
-        Write-Verbose $variableGroups
-
-        foreach($variableGroup in $variableGroups.value){
-            if ($variableGroup.name -like $Name){
-                Write-Verbose "Variable group $Name found."
-                return $variableGroup
-            }
-        }
-        Write-Verbose "Variable group $Name not found."
-        return $null
-    }
-    END { }
 }

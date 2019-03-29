@@ -7,11 +7,12 @@ function Get-AzDoBuildPipelineVariables()
         [int]$DefinitionId = $null,
         [string]$DefinitionName = $null,
         [string][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
-        [string]$PAT
+        [string]$PAT,
+        [string]$ApiVersion = $global:AzDoApiVersion
     )
-    BEGIN   
+    BEGIN
     {
-        if (-Not (Test-Path variable:global:AzDoApiVersion)) { $global:AzDoApiVersion = "5.0"}
+       if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
         if ([string]::IsNullOrEmpty($ProjectUrl)) { Write-Error "Invalid Project Url"; Exit; }
 
@@ -41,11 +42,11 @@ function Get-AzDoBuildPipelineVariables()
 
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
 
-        $headers = Get-AzDoHttpHeader -PAT $PAT 
+        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
     }
     PROCESS
     {
-        $url = "$($ProjectUrl)/_apis/build/definitions/$($definition.Id)?Expand=parameters&api-version=$($global:AzDoApiVersion)"
+        $url = "$($ProjectUrl)/_apis/build/definitions/$($definition.Id)?Expand=parameters&api-version=$($ApiVersion)"
         $definition = Invoke-RestMethod $url -Headers $headers
 
         #Write-Verbose $definition

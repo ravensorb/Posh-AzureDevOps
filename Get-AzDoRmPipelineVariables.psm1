@@ -8,11 +8,12 @@ function Get-AzDoRmPipelineVariables()
         [string]$DefinitionName = $null,
         [string][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
         [string][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("env")]$EnvironmentName = $null,
-        [string]$PAT
+        [string]$PAT,
+        [string]$ApiVersion = $global:AzDoApiVersion
     )
-    BEGIN   
+    BEGIN
     {
-        if (-Not (Test-Path variable:global:AzDoApiVersion)) { $global:AzDoApiVersion = "5.0"}
+       if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
         $ProjectUrl = Get-AzDoRmUrlFromProjectUrl $ProjectUrl
         if ([string]::IsNullOrEmpty($ProjectUrl)) { Write-Error "Invalid Project Url"; Exit; }
@@ -44,11 +45,11 @@ function Get-AzDoRmPipelineVariables()
 
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
 
-        $headers = Get-AzDoHttpHeader -PAT $PAT 
+        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
     }
     PROCESS
     {
-        $url = "$($ProjectUrl)/_apis/release/definitions/$($definition.Id)?expand=Environments&api-version=$($global:AzDoApiVersion)"
+        $url = "$($ProjectUrl)/_apis/release/definitions/$($definition.Id)?expand=Environments&api-version=$($ApiVersion)"
         $definition = Invoke-RestMethod $url -Headers $headers
 
         $variables = @()

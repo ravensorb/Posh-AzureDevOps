@@ -3,11 +3,12 @@ function Get-AzDoHttpHeader()
     [CmdletBinding()]
     param
     (
-        [string]$PAT
+        [string]$PAT,
+        [string]$ApiVersion = $global:AzDoApiVersion
     )
-    BEGIN 
+    BEGIN
     {
-        if (-Not (Test-Path variable:global:AzDoApiVersion)) { $global:AzDoApiVersion = "5.0"}
+       if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
@@ -23,7 +24,7 @@ function Get-AzDoHttpHeader()
             Write-Verbose $base64AuthInfo
             $headers.Add("Authorization", ("Basic {0}" -f $base64AuthInfo))
         }
-        $headers.Add("Accept", "application/json;api-version=$($global:AzDoApiVersion)")
+        $headers.Add("Accept", "application/json;api-version=$($Apiversion)")
     
         Write-Verbose $headers
 

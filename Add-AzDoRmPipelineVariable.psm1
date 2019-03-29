@@ -12,11 +12,12 @@ function Add-AzDoRmPipelineVariable()
         [int][parameter(Mandatory = $true)]$DefinitionId,
         [string]$PAT,
         [string]$Comment,
-        [switch]$Reset
+        [switch]$Reset,
+        [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
     {
-        if (-Not (Test-Path variable:global:AzDoApiVersion)) { $global:AzDoApiVersion = "5.0"}
+       if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
         $headers = Get-AzDoHttpHeader $PAT 
 
@@ -26,7 +27,7 @@ function Add-AzDoRmPipelineVariable()
 
         $ProjectUrl = $ProjectUrl.TrimEnd("/")
 
-        $url = "$($ProjectUrl)/_apis/release/definitions/$($DefinitionId)?expand=Environments?api-version=$($global:AzDoApiVersion)"
+        $url = "$($ProjectUrl)/_apis/release/definitions/$($DefinitionId)?expand=Environments?api-version=$($ApiVersion)"
         $definition = Invoke-RestMethod $url -Headers $headers
 
         if ($Reset)
@@ -96,7 +97,7 @@ function Add-AzDoRmPipelineVariable()
 
         $body = $definition | ConvertTo-Json -Depth 10 -Compress
 
-        Invoke-RestMethod "$($ProjectUrl)/_apis/release/definitions?api-version=$($global:AzDoApiVersion)" -Method Put -Body $body -ContentType 'application/json' -Headers $headers | Out-Null
+        Invoke-RestMethod "$($ProjectUrl)/_apis/release/definitions?api-version=$($ApiVersion)" -Method Put -Body $body -ContentType 'application/json' -Headers $headers | Out-Null
     }
 }
 

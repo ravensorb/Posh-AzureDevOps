@@ -1,4 +1,4 @@
-function Import-AzLibraryVariables()
+function Import-AzDoLibraryVariables()
 {
     [CmdletBinding()]
     param
@@ -9,11 +9,12 @@ function Import-AzLibraryVariables()
         [string]$EnvironmentNameFilter,
         [string]$PAT = "",
         [switch]$Reset,
-        [switch]$Force
+        [switch]$Force,
+        [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
     {
-        if (-Not (Test-Path variable:global:AzDoApiVersion)) { $global:AzDoApiVersion = "5.0"}
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1"}
                 
         Write-Host "Importing Variables into Azure DevOps Variable Groups" -ForegroundColor Green
         Write-Host "`tProject: $ProjectUrl" -ForegroundColor Yellow
@@ -47,7 +48,7 @@ function Import-AzLibraryVariables()
         Write-Verbose "Creating Variables in Group $VariableGroupName"
 
         # Note: We only want to run the reset once no matter what so we clear it after the first loop
-        $variables | % { AzdoAdd-VariableGroupVariable -ProjectUrl $ProjectUrl -PAT $PAT -VariableGroupName $VariableGroupName -VariableName $($_.Name) -VariableValue $($_.Value) -Secret $($_.Secret) -Force:$Force -Reset:$Reset; $Reset = $null }       
+        $variables | % { Add-AzDoLibraryVariable -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -VariableGroupName $VariableGroupName -VariableName $($_.Name) -VariableValue $($_.Value) -Secret $($_.Secret) -Force:$Force -Reset:$Reset -Verbose:$Verbose; $Reset = $null; $Force = $null }       
 
         Write-Host "`tImported $($variables.Count) variables" -ForegroundColor Green
     }
