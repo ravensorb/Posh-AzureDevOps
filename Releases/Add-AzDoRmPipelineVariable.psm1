@@ -17,18 +17,24 @@ function Add-AzDoRmPipelineVariable()
     )
     BEGIN
     {
-       if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
+        if (-not $PSBoundParameters.ContainsKey('Verbose'))
+        {
+            $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
+        }        
 
-        $headers = Get-AzDoHttpHeader $PAT 
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
         $PSBoundParameters.Keys | ForEach-Object { if ($Secret -and $_ -eq "VariableValue") { Write-Verbose "VariableValue = *******" } else { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }}
 
-        $ProjectUrl = $ProjectUrl.TrimEnd("/")
+        $headers = Get-AzDoHttpHeader $PAT 
 
-        $url = "$($ProjectUrl)/_apis/release/definitions/$($DefinitionId)?expand=Environments?api-version=$($ApiVersion)"
-        $definition = Invoke-RestMethod $url -Headers $headers
+        $ProjectUrl = Get-AzDoRmUrlFromProjectUrl -ProjectUrl $ProjectUrl
+
+        $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions"
+
+        $definition = Invoke-RestMethod "$($apiUrl)&expand=Environments" -Headers $headers
 
         if ($Reset)
         {
@@ -97,7 +103,7 @@ function Add-AzDoRmPipelineVariable()
 
         $body = $definition | ConvertTo-Json -Depth 10 -Compress
 
-        Invoke-RestMethod "$($ProjectUrl)/_apis/release/definitions?api-version=$($ApiVersion)" -Method Put -Body $body -ContentType 'application/json' -Headers $headers | Out-Null
+        Invoke-RestMethod $apiUrl -Method Put -Body $body -ContentType 'application/json' -Headers $headers | Out-Null
     }
 }
 

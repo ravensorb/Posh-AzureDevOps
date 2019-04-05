@@ -10,19 +10,25 @@ function Get-AzDoLibraryVariableGroup()
     )
     BEGIN
     {
+        if (-not $PSBoundParameters.ContainsKey('Verbose'))
+        {
+            $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
+        }        
+    
+        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = $null }
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1"}
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
+
+        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion
+
+        $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups"
     }
     PROCESS
     {
-        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
-
-        $ProjectUrl = $ProjectUrl.TrimEnd("/")
-        $url = "$($ProjectUrl)/_apis/distributedtask/variablegroups?api-version=$($ApiVersion)"
-        $variableGroups = Invoke-RestMethod $url -Headers $headers
+        $variableGroups = Invoke-RestMethod $apiUrl -Headers $headers
         
         Write-Verbose $variableGroups
 

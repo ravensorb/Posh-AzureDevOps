@@ -13,17 +13,35 @@ function Get-AzDoRmPipelineVariables()
     )
     BEGIN
     {
-       if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
+        if (-not $PSBoundParameters.ContainsKey('Verbose'))
+        {
+            $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
+        }        
 
-        $ProjectUrl = Get-AzDoRmUrlFromProjectUrl $ProjectUrl
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
+
         if ([string]::IsNullOrEmpty($ProjectUrl)) { Write-Error "Invalid Project Url"; Exit; }
         if ([string]::IsNullOrEmpty($EnvironmentName)) { $EnvironmentName = "*" }
-
+      
         if ($DefinitionId -eq $null -and [string]::IsNullOrEmpty($DefinitionName)) { Write-Error "Definition ID or Name must be specified"; Exit;}
+
+        # Write-Host "Importing Variable into Azure DevOps Variable Groups" -ForegroundColor Green
+        # Write-Host "`tProject: $ProjectUrl" -ForegroundColor Green
+        # Write-Host "`tDefinition ID: $DefinitionId" -ForegroundColor Green
+        # Write-Host "`tVariable: $VariableName = $VariableValue" -ForegroundColor Green
+        # Write-Host "`tEnvironment: $EnvironmentName" -ForegroundColor Green
+
+        Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
+        Write-Verbose "Parameter Values"
+        $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
+
+        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
+
+        $ProjectUrl = Get-AzDoRmUrlFromProjectUrl $ProjectUrl
 
         $definition = $null
 
-        if ($DefinitionId -ne $null)
+        if ($DefinitionId -ne $null -and $DefinitionId -gt 0)
         {
             $definition = Get-AzDoRmReleaseDefinition -ProjectUrl $ProjectUrl -Id $DefinitionId -PAT $PAT
         }
@@ -34,23 +52,11 @@ function Get-AzDoRmPipelineVariables()
 
         if ($definition -eq $null) { Write-Error "Could not find a valid release definition.  Check your parameters and try again"; Exit;}
 
-        Write-Host "Importing Variable into Azure DevOps Variable Groups" -ForegroundColor Green
-        Write-Host "`tProject: $ProjectUrl" -ForegroundColor Green
-        Write-Host "`tDefinition ID: $DefinitionId" -ForegroundColor Green
-        Write-Host "`tVariable: $VariableName = $VariableValue" -ForegroundColor Green
-        Write-Host "`tEnvironment: $EnvironmentName" -ForegroundColor Green
-
-        Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
-        Write-Verbose "Parameter Values"
-
-        $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
-
-        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
     }
     PROCESS
     {
-        $url = "$($ProjectUrl)/_apis/release/definitions/$($definition.Id)?expand=Environments&api-version=$($ApiVersion)"
-        $definition = Invoke-RestMethod $url -Headers $headers
+        $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions/$($definition.Id)" -QueryStringParams "Expand=Environments"
+        $definition = Invoke-RestMethod $apiUrl -Headers $headers
 
         $variables = @()
 

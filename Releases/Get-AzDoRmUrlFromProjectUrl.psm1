@@ -7,6 +7,11 @@ function Get-AzDoRmUrlFromProjectUrl()
     )
     BEGIN
     {
+        if (-not $PSBoundParameters.ContainsKey('Verbose'))
+        {
+            $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
+        }        
+
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }

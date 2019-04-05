@@ -10,7 +10,12 @@ function Get-AzDoRepoBranches()
     )
     BEGIN
     {
-       if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
+        if (-not $PSBoundParameters.ContainsKey('Verbose'))
+        {
+            $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
+        }        
+
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
@@ -21,9 +26,9 @@ function Get-AzDoRepoBranches()
         $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
 
         # GET https://dev.azure.com/{organization}/{project}/_apis/git/repositories/{repositoryId}/refs?api-version=5
-        $url = "$($ProjectUrl)/_apis/git/repositories/$Name/refs?includeStatuses=True&latestStatusesOnly=True&api-version=$($ApiVersion)"
+        $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/git/repositories/$($Name)/refs" -QueryStringParams "includeStatuses=True&latestStatusesOnly=True"
 
-        $branches = Invoke-RestMethod $url -Headers $headers 
+        $branches = Invoke-RestMethod $apiUrl -Headers $headers 
         
         Write-Verbose $branches
 

@@ -8,7 +8,12 @@ function Get-AzDoHttpHeader()
     )
     BEGIN
     {
-       if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
+        if (-not $PSBoundParameters.ContainsKey('Verbose'))
+        {
+            $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
+        }        
+
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"

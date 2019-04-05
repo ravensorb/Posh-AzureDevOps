@@ -11,29 +11,35 @@ function Get-AzDoRmReleaseDefinition()
     )
     BEGIN
     {
-       if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
+        if (-not $PSBoundParameters.ContainsKey('Verbose'))
+        {
+            $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
+        }        
+
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
+
         if ($Id -eq $null -and [string]::IsNullOrEmpty($Name)) { Write-Error "Definition ID or Name must be specified"; Exit;}
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
+
+        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
+
+        $ProjectUrl = Get-AzDoRmUrlFromProjectUrl $ProjectUrl      
     }
     PROCESS
     {
-        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion
-
-        $ProjectUrl = Get-AzDoRmUrlFromProjectUrl $ProjectUrl
-
         if ($Id -ne $null -and $Id -ne 0) 
         {
-            $url = "$($ProjectUrl)/_apis/release/definitions/$($Id)?api-version=$($ApiVersion)"
+            $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions/$($Id)"
         }
         else 
         {
-            $url = "$($ProjectUrl)/_apis/release/definitions?api-version=$($ApiVersion)&searchText=$Name"
+            $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions" -QueryStringParams "searchText=$Name"
         }
 
-        $releaseDefinitions = Invoke-RestMethod $url -Headers $headers 
+        $releaseDefinitions = Invoke-RestMethod $apiUrl -Headers $headers 
         
         Write-Verbose $releaseDefinitions
 
