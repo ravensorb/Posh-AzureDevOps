@@ -1,16 +1,16 @@
 <#
 
 .SYNOPSIS
-Get all variables in a specific Azure DevOps libary
+Removes the speciifed library group if it exists
 
 .DESCRIPTION
-The  command will retreive all variables to the specificed library
+The command will remove the specificed library group
 
 .PARAMETER ProjectUrl
 The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
 
 .PARAMETER Name
-The name of the variable group to retrieve
+The name of the variable group to remove
 
 .PARAMETER PAT
 A valid personal access token with at least read access for build definitions
@@ -19,7 +19,7 @@ A valid personal access token with at least read access for build definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoLibraryVariableGroup -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Name <variable group name> -PAT <personal access token>
+Remove-AzDoLibraryVariableGroup -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Name <variable group name> -PAT <personal access token>
 
 .NOTES
 
@@ -27,7 +27,7 @@ Get-AzDoLibraryVariableGroup -ProjectUrl https://dev.azure.com/<organizztion>/<p
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoLibraryVariableGroup()
+function Remove-AzDoLibraryVariableGroup()
 {
     [CmdletBinding()]
     param
@@ -50,26 +50,37 @@ function Get-AzDoLibraryVariableGroup()
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
-
+        
         $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion
     }
     PROCESS
     {
-        $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups"
+        $method = "DELETE"
 
-        $variableGroups = Invoke-RestMethod $apiUrl -Headers $headers
-        
-        Write-Verbose $variableGroups
+        $variableGroup = Get-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -Name $Name -PAT $PAT -ApiVersion $ApiVersion
 
-        foreach($variableGroup in $variableGroups.value){
-            if ($variableGroup.name -like $Name){
-                Write-Verbose "Variable group $Name found."
-                return $variableGroup
-            }   
+        if (-Not $variableGroup) 
+        {
+            Write-Verbose "Variable group $Name does not exist"
+
+            return
         }
-        
+
         Write-Verbose "Variable group $Name not found."
-        return $null
+
+        Write-Verbose "Create variable group $Name."
+
+        # DELETE https://dev.azure.com/{organization}/{project}/_apis/distributedtask/variablegroups/{groupId}?api-version=5.0-preview.1
+        $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups/$($variableGroup.id)"
+
+        #Write-Verbose $body
+        $response = Invoke-RestMethod $apiUrl -Method $method -ContentType 'application/json' -Header $headers    
     }
-    END { }
+    END
+    {
+        Write-Verbose "Response: $($response.id)"
+
+        #$response
+        return $true
+    }
 }

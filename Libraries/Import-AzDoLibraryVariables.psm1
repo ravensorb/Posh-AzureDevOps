@@ -1,3 +1,44 @@
+<#
+
+.SYNOPSIS
+Import variables from a CSV file into an Azure DevOps Library
+
+.DESCRIPTION
+This command will import all the variables in a CSV into a specific Azure DevOps Library
+
+.PARAMETER ProjectUrl
+The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
+
+.PARAMETER csvFile
+The path to the CSV file
+
+.PARAMETER VariableGroupName
+The name of the variable group in the library to import the values into 
+
+.PARAMETER EnvironmentNameFilter
+This is an option parameter and is used to file the variables that are imported by environment (can also be a * for a wild card)
+
+.PARAMETER Reset
+Indicates if the ENTIRE library should be reset. This means that ALL values are REMOVED. Use with caution
+
+.PARAMETER Force
+Indicates if the library group should be created if it doesn't exist
+
+.PARAMETER PAT
+A valid personal access token with at least read access for build definitions
+
+.PARAMETER ApiVersion
+Allows for specifying a specific version of the api to use (default is 5.0)
+
+.EXAMPLE
+Import-AzDoLibraryVariables -ProjectUrl https://dev.azure.com/<organizztion>/<project> -csvFile <csv file to import> -VariableGroupName <variable group to import into> -EnvironmentNameFilter <
+
+.NOTES
+
+.LINK
+https://github.com/ravensorb/Posh-AzureDevOps
+
+#>
 function Import-AzDoLibraryVariables()
 {
     [CmdletBinding()]
@@ -5,11 +46,11 @@ function Import-AzDoLibraryVariables()
     (
         [string][parameter(Mandatory = $true)]$ProjectUrl,
         [string][parameter(Mandatory = $true)]$csvFile,
-        [string]$VariableGroupName = "*",
-        [string]$EnvironmentNameFilter,
-        [string]$PAT = "",
+        [string][parameter(Mandatory = $true)]$VariableGroupName,
+        [string]$EnvironmentNameFilter = "*",
         [switch]$Reset,
         [switch]$Force,
+        [string]$PAT = "",
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -19,16 +60,9 @@ function Import-AzDoLibraryVariables()
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
         }        
 
+        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1"}
                 
-        # Write-Host "Importing Variables into Azure DevOps Variable Groups" -ForegroundColor Green
-        # Write-Host "`tProject: $ProjectUrl" -ForegroundColor Yellow
-        # Write-Host "`tCSV File: $csvFile" -ForegroundColor Yellow
-        # Write-Host "`tVariable Group: $VariableGroupName" -ForegroundColor Yellow
-        # Write-Host "`tEnvrionment Name: $EnvironmentNameFilter" -ForegroundColor Yellow
-        # Write-Host "`tCreate Variable Group If doesn't Exists: $Force" -ForegroundColor Yellow
-        # Write-Host "`tClear Variable Group before importing: $Reset" -ForegroundColor Yellow
-
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }

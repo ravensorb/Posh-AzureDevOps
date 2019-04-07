@@ -1,3 +1,23 @@
+<#
+
+.SYNOPSIS
+Convert a standard Azure DevOps Project URL into an Azure DevOps Release Manager URL
+
+.DESCRIPTION
+The command will return a Azure DevOps url for access the release management APIs based on the Project URL specified
+
+.PARAMETER ProjectUrl
+The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
+
+.EXAMPLE
+Get-AzDoRmUrlFromProjectUrl -ProjectUrl https://dev.azure.com/<organizztion>/<project> 
+
+.NOTES
+
+.LINK
+https://github.com/ravensorb/Posh-AzureDevOps
+
+#>
 function Get-AzDoRmUrlFromProjectUrl()
 {
     [CmdletBinding()]

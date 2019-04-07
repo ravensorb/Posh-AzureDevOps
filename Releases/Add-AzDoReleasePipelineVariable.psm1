@@ -1,18 +1,73 @@
-function Add-AzDoRmPipelineVariable()
+<#
+
+.SYNOPSIS
+This commend provides accesss Release Pipeline Varaibles from Azure DevOps
+
+.DESCRIPTION
+The  command will retrieve all of the variables in a specific release pipeline
+
+.PARAMETER ProjectUrl
+The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
+
+.PARAMETER DefinitionId
+The id of the release definition to update (use on this OR the name parameter)
+
+.PARAMETER DefinitionName
+The name of the release definition to update (use on this OR the id parameter)
+
+.PARAMETER VariableName
+Tha name of the variable to create/update
+
+.PARAMETER VariableValue
+The variable for the variable
+
+.PARAMETER Secret
+Indicates if the vaule should be stored as a "secret"
+
+.PARAMETER VariableGroups
+N/A
+
+.PARAMETER Comment
+A comment to add to the variable
+
+.PARAMETER Reset
+Indicates if the ENTIRE library should be reset. This means that ALL values are REMOVED. Use with caution
+
+.PARAMETER Force
+Indicates if the library group should be created if it doesn't exist
+
+.PARAMETER PAT
+A valid personal access token with at least read access for build definitions
+
+.PARAMETER ApiVersion
+Allows for specifying a specific version of the api to use (default is 5.0)
+
+.EXAMPLE
+Add-AzDoReleasePipelineVariable -ProjectUrl https://dev.azure.com/<organizztion>/<project> -DefinitionName <release defintiion name> -VariableName <variable name> -VariableValue <varaible value> -Environment <env name> -PAT <personal access token>
+
+.NOTES
+
+.LINK
+https://github.com/ravensorb/Posh-AzureDevOps
+
+#>
+
+function Add-AzDoReleasePipelineVariable()
 {
     [CmdletBinding()]
     param
     (
         [string][parameter(Mandatory = $true)]$ProjectUrl,
+        [int][parameter(ParameterSetName='Id',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionId = $null,
+        [string][parameter(ParameterSetName='Name',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionName = $null,
         [string][parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
         [string][parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("value")]$VariableValue,
         [string][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("env")]$EnvironmentName,
         [bool][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$Secret,
         [int[]]$VariableGroups,
-        [int][parameter(Mandatory = $true)]$DefinitionId,
-        [string]$PAT,
         [string]$Comment,
         [switch]$Reset,
+        [string]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -28,13 +83,24 @@ function Add-AzDoRmPipelineVariable()
         Write-Verbose "Parameter Values"
         $PSBoundParameters.Keys | ForEach-Object { if ($Secret -and $_ -eq "VariableValue") { Write-Verbose "VariableValue = *******" } else { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }}
 
-        $headers = Get-AzDoHttpHeader $PAT 
+        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
 
         $ProjectUrl = Get-AzDoRmUrlFromProjectUrl -ProjectUrl $ProjectUrl
+    }
+    PROCESS
+    {
+        $definition = $null
 
-        $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions"
+        if ($DefinitionId -ne $null -and $DefinitionId -gt 0)
+        {
+            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -Id $DefinitionId -PAT $PAT
+        }
+        elseif (-Not [string]::IsNullOrEmpty($DefinitionName))
+        {
+            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -Name $DefinitionName -PAT $PAT -ExpandFields "Environments"
+        }
 
-        $definition = Invoke-RestMethod "$($apiUrl)&expand=Environments" -Headers $headers
+        if ($definition -eq $null) { throw "Could not find a valid release definition.  Check your parameters and try again"; }
 
         if ($Reset)
         {
@@ -53,9 +119,9 @@ function Add-AzDoRmPipelineVariable()
 
             $definition.variableGroups = @()
         }
-    }
-    PROCESS
-    {
+
+        $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions"
+
         $value = @{value=$VariableValue}
     
         if ($Secret)
@@ -80,9 +146,7 @@ function Add-AzDoRmPipelineVariable()
         {
             $definition.variables | Add-Member -Name $VariableName -MemberType NoteProperty -Value $value -Force
         }
-    }
-    END
-    {
+
         $definition.source = "restApi"
 
         if ($Comment)
@@ -103,7 +167,13 @@ function Add-AzDoRmPipelineVariable()
 
         $body = $definition | ConvertTo-Json -Depth 10 -Compress
 
-        Invoke-RestMethod $apiUrl -Method Put -Body $body -ContentType 'application/json' -Headers $headers | Out-Null
+        $response = Invoke-RestMethod $apiUrl -Method Put -Body $body -ContentType 'application/json' -Headers $headers 
+    }
+    END
+    {
+        Write-Verbose "Response: $($response.id)"
+
+        $response
     }
 }
 

@@ -5,7 +5,7 @@ function Get-AzDoApiUrl()
     (
         [string][parameter(Mandatory = $true)]$ProjectUrl,
         [string][parameter(Mandatory = $true)]$BaseApiPath,
-        [string]$QueryStringParams = $null,
+        [string[]]$QueryStringParams = $null,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -18,8 +18,8 @@ function Get-AzDoApiUrl()
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
-        Write-Verbose "Parameter Values"
-        $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
+        Write-Verbose "`tParameter Values"
+        $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "`t`t$_ = '$($PSBoundParameters[$_])'" }
     }
     PROCESS
     {
@@ -28,11 +28,12 @@ function Get-AzDoApiUrl()
 
         $apiUrl = "$($ProjectUrl)/$($BaseApiPath)?api-version=$($ApiVersion)"
         
-        if (-Not [string]::IsNullOrEmpty($QueryStringParams))
-        {
-            $apiUrl = "$($apiUrl)&$($QueryStringParams)"
+        if ($QueryStringParams) {
+            foreach ($q in $QueryStringParams) {
+                $apiUrl = "$($apiUrl)&$($q)"
+            }
         }
-
+        
         Write-Verbose "API Url: $apiUrl"
 
         return $apiUrl

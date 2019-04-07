@@ -19,7 +19,7 @@ A valid personal access token with at least read access for build definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoLibraryVariableGroup -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Name <variable group name> -PAT <personal access token>
+New-AzDoLibraryVariableGroup -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Name <variable group name> -PAT <personal access token>
 
 .NOTES
 
@@ -27,15 +27,16 @@ Get-AzDoLibraryVariableGroup -ProjectUrl https://dev.azure.com/<organizztion>/<p
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoLibraryVariableGroup()
+function New-AzDoLibraryVariableGroup()
 {
     [CmdletBinding()]
     param
     (
         [string][parameter(Mandatory = $true)]$ProjectUrl,
         [string][parameter(Mandatory = $true)]$Name,
+        [string]$Description,
         [string]$PAT,
-        [string]$ApiVersion
+        [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
     {
@@ -55,21 +56,36 @@ function Get-AzDoLibraryVariableGroup()
     }
     PROCESS
     {
+        $method = "Post"
+
+        $variableGroup = Get-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -Name $Name -PAT $PAT -ApiVersion $ApiVersion
+
+        if ($variableGroup) 
+        {
+            Write-Verbose "Variable group $Name exists"
+
+            return $variableGroup
+        }
+
+        Write-Verbose "Variable group $Name not found."
+
+        Write-Verbose "Create variable group $Name."
+
+        $variableGroup = @{name=$Name;description=$Description;variables=New-Object PSObject;}
         $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups"
 
-        $variableGroups = Invoke-RestMethod $apiUrl -Headers $headers
-        
-        Write-Verbose $variableGroups
+        $variableGroup.variables | Add-Member -Name "NewVariable1" -MemberType NoteProperty -Value @{value="";isSecret=$false} -Force
 
-        foreach($variableGroup in $variableGroups.value){
-            if ($variableGroup.name -like $Name){
-                Write-Verbose "Variable group $Name found."
-                return $variableGroup
-            }   
-        }
+        #Write-Verbose "Persist variable group $Name."
+        $body = $variableGroup | ConvertTo-Json -Depth 10 -Compress
         
-        Write-Verbose "Variable group $Name not found."
-        return $null
+        #Write-Verbose $body
+        $response = Invoke-RestMethod $apiUrl -Method $method -Body $body -ContentType 'application/json' -Header $headers    
     }
-    END { }
+    END
+    {
+        Write-Verbose "Response: $($response.id)"
+
+        $response
+    }
 }

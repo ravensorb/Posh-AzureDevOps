@@ -1,12 +1,48 @@
+<#
+
+.SYNOPSIS
+This commend provides accesss Build Pipeline Varaibles from Azure DevOps
+
+.DESCRIPTION
+The  command will retrieve all of the variables in a specific build pipeline
+
+.PARAMETER ProjectUrl
+The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
+
+.PARAMETER DefinitionName
+The name of the build definition to retrieve (use on this OR the id parameter)
+
+.PARAMETER DefinitionId
+The id of the build definition to retrieve (use on this OR the name parameter)
+
+.PARAMETER VariableName
+The name of the variable in the build definition to retrieve
+
+.PARAMETER PAT
+A valid personal access token with at least read access for build definitions
+
+.PARAMETER ApiVersion
+Allows for specifying a specific version of the api to use (default is 5.0)
+
+.EXAMPLE
+Get-AzDoBuildPipelineVariables -ProjectUrl https://dev.azure.com/<organizztion>/<project> -DefinitionName <build defintiion name> -VariableName <variable name> -PAT <personal access token>
+
+.NOTES
+
+.LINK
+https://github.com/ravensorb/Posh-AzureDevOps
+
+#>
 function Get-AzDoBuildPipelineVariables()
 {
-    [CmdletBinding()]
+    [CmdletBinding(
+        DefaultParameterSetName='Name'
+    )]
     param
     (
         [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [int]$DefinitionId = $null,
-        [string]$DefinitionName = $null,
-        [string][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$VariableName,
+        [int][parameter(ParameterSetName='Id',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionId = $null,
+        [string][parameter(ParameterSetName='Name',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionName = $null,
         [string]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
@@ -19,47 +55,54 @@ function Get-AzDoBuildPipelineVariables()
     
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if ([string]::IsNullOrEmpty($ProjectUrl)) { Write-Error "Invalid Project Url"; Exit; }
+        if ([string]::IsNullOrEmpty($ProjectUrl)) { throw "Invalid Project Url"; }
 
-        if ($DefinitionId -eq $null -and [string]::IsNullOrEmpty($DefinitionName)) { Write-Error "Definition ID or Name must be specified"; Exit;}
+        if ($DefinitionId -eq $null -and [string]::IsNullOrEmpty($DefinitionName)) { throw "Definition ID or Name must be specified"; }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
-        Write-Verbose "Parameter Values"
+        Write-Verbose "`tParameter Values"
 
-        $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
+        $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "`t`t$_ = '$($PSBoundParameters[$_])'" }
 
+        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
+    }
+    PROCESS
+    {
         $definition = $null
 
         if ($DefinitionId -ne $null -and $DefinitionId -gt 0)
         {
-            $definition = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -Id $DefinitionId -PAT $PAT
+            $definition = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -Id $DefinitionId -PAT $PAT 
         }
         elseif (-Not [string]::IsNullOrEmpty($DefinitionName))
         {
             $definition = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -Name $DefinitionName -PAT $PAT
         }
 
-        if ($definition -eq $null) { Write-Error "Could not find a valid build definition.  Check your parameters and try again"; Exit;}
+        if ($definition -eq $null) { throw "Could not find a valid build definition.  Check your parameters and try again"; }
 
-        # Write-Host "Retrieving Variable form Azure DevOps Build Pipeline" -ForegroundColor Green
-        # Write-Host "`tProject: $ProjectUrl" -ForegroundColor Green
-        # Write-Host "`tDefinition ID: $DefinitionId" -ForegroundColor Green
-        # Write-Host "`tVariable: $VariableName = $VariableValue" -ForegroundColor Green
-        # Write-Host "`tEnvironment: $EnvironmentName" -ForegroundColor Green
-
-        $headers = Get-AzDoHttpHeader -PAT $PAT -ApiVersion $ApiVersion 
-    }
-    PROCESS
-    {
         $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/build/definitions/$($definition.Id)" -QueryStringParams "Expand=parameters"
+
         $definition = Invoke-RestMethod $apiUrl -Headers $headers
 
-        #Write-Verbose $definition
+        Write-Verbose "---------BUILD DEFINITION---------"
+        Write-Verbose $definition
+        Write-Verbose "---------BUILD DEFINITION---------"
+
+        if (-Not $definition.variables) {
+            Write-Verbose "No variables definied"
+            return $null
+        }
+
+        # Write-Verbose "---------BUILD VARAIBLES---------"
+        # $definition.variables.PSObject.Properties | Write-Verbose
+        # Write-Verbose "---------BUILD VARAIBLES---------"
 
         $variables = @()
 
+        Write-Verbose "Build Variables"
         $definition.variables.PSObject.Properties | ? { $_.MemberType -eq "NoteProperty"} | % { 
-            #Write-Verbose "$($_.Name) => $($_.Value)"
+            Write-Verbose "`t$($_.Name) => $($_.Value)"
 
             $variables += [pscustomobject]@{
                 Name = $_.Name;
@@ -68,12 +111,10 @@ function Get-AzDoBuildPipelineVariables()
                 AllowOverride = $_.Value.allowOverride;
             }
         };
-
-        $variables
     }
     END
     {
-
+        $variables
     }
 }
 
