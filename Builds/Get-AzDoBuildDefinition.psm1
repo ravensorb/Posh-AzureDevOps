@@ -91,8 +91,6 @@ function Get-AzDoBuildDefinition()
         Write-Verbose $buildDefinitions
         Write-Verbose "---------BUILD DEFINITION---------"
 
-        Write-Verbose "Build Definition: $($buildDefinitions)"
-
         if ($buildDefinitions.count -ne $null)
         {   
             foreach($bd in $buildDefinitions.value)
@@ -107,6 +105,8 @@ function Get-AzDoBuildDefinition()
                 }
             }
             Write-Verbose "Build definition $Name not found."
+
+            return $null
         } 
         elseif ($buildDefinitions -ne $null) {
             return $buildDefinitions

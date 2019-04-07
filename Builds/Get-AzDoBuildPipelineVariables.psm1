@@ -110,7 +110,7 @@ function Get-AzDoBuildPipelineVariables()
                 Secret = $_.Value.isSecret;
                 AllowOverride = $_.Value.allowOverride;
             }
-        };
+        }
     }
     END
     {
