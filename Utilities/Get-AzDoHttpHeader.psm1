@@ -3,7 +3,7 @@ function Get-AzDoHttpHeader()
     [CmdletBinding()]
     param
     (
-        [string]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN

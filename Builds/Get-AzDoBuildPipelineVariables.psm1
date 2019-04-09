@@ -9,10 +9,10 @@ The  command will retrieve all of the variables in a specific build pipeline
 .PARAMETER ProjectUrl
 The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
 
-.PARAMETER DefinitionName
+.PARAMETER BuildDefinitionName
 The name of the build definition to retrieve (use on this OR the id parameter)
 
-.PARAMETER DefinitionId
+.PARAMETER BuildDefinitionId
 The id of the build definition to retrieve (use on this OR the name parameter)
 
 .PARAMETER VariableName
@@ -25,7 +25,7 @@ A valid personal access token with at least read access for build definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoBuildPipelineVariables -ProjectUrl https://dev.azure.com/<organizztion>/<project> -DefinitionName <build defintiion name> -VariableName <variable name> -PAT <personal access token>
+Get-AzDoBuildPipelineVariables -ProjectUrl https://dev.azure.com/<organizztion>/<project> -BuildDefinitionName <build defintiion name> -VariableName <variable name> -PAT <personal access token>
 
 .NOTES
 
@@ -40,10 +40,10 @@ function Get-AzDoBuildPipelineVariables()
     )]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [int][parameter(ParameterSetName='Id',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionId = $null,
-        [string][parameter(ParameterSetName='Name',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionName = $null,
-        [string]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [int][parameter(ParameterSetName='Id', ValueFromPipelineByPropertyName = $true)]$BuildDefinitionId = $null,
+        [string][parameter(ParameterSetName='Name', ValueFromPipelineByPropertyName = $true)]$BuildDefinitionName = $null,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -57,7 +57,7 @@ function Get-AzDoBuildPipelineVariables()
 
         if ([string]::IsNullOrEmpty($ProjectUrl)) { throw "Invalid Project Url"; }
 
-        if ($DefinitionId -eq $null -and [string]::IsNullOrEmpty($DefinitionName)) { throw "Definition ID or Name must be specified"; }
+        if ($BuildDefinitionId -eq $null -and [string]::IsNullOrEmpty($BuildDefinitionName)) { throw "Definition ID or Name must be specified"; }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "`tParameter Values"
@@ -70,13 +70,13 @@ function Get-AzDoBuildPipelineVariables()
     {
         $definition = $null
 
-        if ($DefinitionId -ne $null -and $DefinitionId -gt 0)
+        if ($BuildDefinitionId -ne $null -and $BuildDefinitionId -gt 0)
         {
-            $definition = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -Id $DefinitionId -PAT $PAT 
+            $definition = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -BuildDefinitionId $BuildDefinitionId -PAT $PAT 
         }
-        elseif (-Not [string]::IsNullOrEmpty($DefinitionName))
+        elseif (-Not [string]::IsNullOrEmpty($BuildDefinitionName))
         {
-            $definition = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -Name $DefinitionName -PAT $PAT
+            $definition = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -BuildDefinitionName $BuildDefinitionName -PAT $PAT
         }
 
         if ($definition -eq $null) { throw "Could not find a valid build definition.  Check your parameters and try again"; }

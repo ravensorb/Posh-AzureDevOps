@@ -22,7 +22,7 @@ A valid personal access token with at least read access for build definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoBuilds -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Name <build defintiion name> -PAT <personal access token>
+Get-AzDoBuilds -ProjectUrl https://dev.azure.com/<organizztion>/<project> -BuildDefinitionName <build defintiion name> -PAT <personal access token>
 
 .NOTES
 
@@ -37,11 +37,11 @@ function Get-AzDoBuilds()
     )]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [string][parameter(ParameterSetName='Name')]$BuildDefinitionName,
-        [int][parameter(ParameterSetName='ID')]$BuildDefinitionId,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [string][parameter(ParameterSetName='Name', ValueFromPipelinebyPropertyName = $true)]$BuildDefinitionName,
+        [int][parameter(ParameterSetName='ID', ValueFromPipelinebyPropertyName = $true)]$BuildDefinitionId,
         [int]$Count = 1,
-        [string][parameter(Mandatory = $true)]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -67,11 +67,11 @@ function Get-AzDoBuilds()
 
         if ($BuildDefinitionId -ne $null -and $BuildDefinitionId -ne 0) 
         {
-            $buildDefinition = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -PAT $PAT -Id $BuildDefinitionId 
+            $buildDefinition = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -PAT $PAT -BuildDefinitionId $BuildDefinitionId 
         }
         elseif (-Not [string]::IsNullOrEmpty($BuildDefinitionName))
         {
-            $buildDefinition = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -PAT $PAT -Name $BuildDefinitionName 
+            $buildDefinition = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -PAT $PAT -BuildDefinitionName $BuildDefinitionName 
         }
 
         if (-Not $buildDefinition)

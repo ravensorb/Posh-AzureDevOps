@@ -25,7 +25,7 @@ A valid personal access token with at least read access for build definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Remove-AzDoLibraryVariable -ProjectUrl https://dev.azure.com/<organizztion>/<project> -DefinitionName <build defintiion name> -VariableName <variable name> -PAT <personal access token>
+Remove-AzDoLibraryVariable -ProjectUrl https://dev.azure.com/<organizztion>/<project> -VaraibleGroupName <name of variable group> -VariableName <variable name> -PAT <personal access token>
 
 .NOTES
 
@@ -38,11 +38,11 @@ function Remove-AzDoLibraryVariable()
     [CmdletBinding()]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [string][parameter(Mandatory = $true)]$VariableGroupName,
-        [string][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [string][parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]$VariableGroupName,
+        [string][parameter(ValueFromPipelineByPropertyName = $true)]$VariableName,
         [switch]$All,
-        [string]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -99,12 +99,13 @@ function Remove-AzDoLibraryVariable()
         #Write-Verbose $body
         $response = Invoke-RestMethod $apiUrl -Method Put -Body $body -ContentType 'application/json' -Header $headers
         
-    }
-    END
-    {
         Write-Verbose "Response: $($response.id)"
 
         #$response
         return $true
+    }
+    END
+    {
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
     }
 }

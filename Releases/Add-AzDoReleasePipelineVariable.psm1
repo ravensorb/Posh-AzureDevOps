@@ -9,10 +9,10 @@ The  command will retrieve all of the variables in a specific release pipeline
 .PARAMETER ProjectUrl
 The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
 
-.PARAMETER DefinitionId
+.PARAMETER ReleaseDefinitionId
 The id of the release definition to update (use on this OR the name parameter)
 
-.PARAMETER DefinitionName
+.PARAMETER ReleaseDefinitionName
 The name of the release definition to update (use on this OR the id parameter)
 
 .PARAMETER VariableName
@@ -43,7 +43,7 @@ A valid personal access token with at least read access for build definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Add-AzDoReleasePipelineVariable -ProjectUrl https://dev.azure.com/<organizztion>/<project> -DefinitionName <release defintiion name> -VariableName <variable name> -VariableValue <varaible value> -Environment <env name> -PAT <personal access token>
+Add-AzDoReleasePipelineVariable -ProjectUrl https://dev.azure.com/<organizztion>/<project> -ReleaseDefinitionName <release defintiion name> -VariableName <variable name> -VariableValue <varaible value> -Environment <env name> -PAT <personal access token>
 
 .NOTES
 
@@ -57,17 +57,17 @@ function Add-AzDoReleasePipelineVariable()
     [CmdletBinding()]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [int][parameter(ParameterSetName='Id',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionId = $null,
-        [string][parameter(ParameterSetName='Name',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionName = $null,
-        [string][parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
-        [string][parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("value")]$VariableValue,
-        [string][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("env")]$EnvironmentName,
-        [bool][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$Secret,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [int][parameter(ParameterSetName='Id', ValueFromPipelineByPropertyName = $true)]$ReleaseDefinitionId = $null,
+        [string][parameter(ParameterSetName='Name', ValueFromPipelineByPropertyName = $true)]$ReleaseDefinitionName = $null,
+        [string][parameter(Mandatory = $true,  ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
+        [string][parameter(Mandatory = $true,  ValueFromPipelineByPropertyName = $true)][Alias("value")]$VariableValue,
+        [string][parameter(ValueFromPipelineByPropertyName = $true)][Alias("env")]$EnvironmentName,
+        [bool][parameter(ValueFromPipelineByPropertyName = $true)]$Secret,
         [int[]]$VariableGroups,
         [string]$Comment,
         [switch]$Reset,
-        [string]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -91,13 +91,13 @@ function Add-AzDoReleasePipelineVariable()
     {
         $definition = $null
 
-        if ($DefinitionId -ne $null -and $DefinitionId -gt 0)
+        if ($ReleaseDefinitionId -ne $null -and $ReleaseDefinitionId -gt 0)
         {
-            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -Id $DefinitionId -PAT $PAT
+            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -ReleaseDefinitionId $ReleaseDefinitionId -PAT $PAT
         }
-        elseif (-Not [string]::IsNullOrEmpty($DefinitionName))
+        elseif (-Not [string]::IsNullOrEmpty($ReleaseDefinitionName))
         {
-            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -Name $DefinitionName -PAT $PAT -ExpandFields "Environments"
+            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -ReleaseDefinitionName $ReleaseDefinitionName -PAT $PAT -ExpandFields "Environments"
         }
 
         if ($definition -eq $null) { throw "Could not find a valid release definition.  Check your parameters and try again"; }

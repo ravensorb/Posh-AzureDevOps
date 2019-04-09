@@ -9,10 +9,10 @@ The command will remove a variable to the specified Azure DevOps reelase pipelin
 .PARAMETER ProjectUrl
 The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
 
-.PARAMETER DefinitionId
+.PARAMETER ReleaseDefinitionId
 The id of the reelase definition to update (use on this OR the name parameter)
 
-.PARAMETER DefinitionName
+.PARAMETER ReleaseDefinitionName
 The name of the build definition to update (use on this OR the id parameter)
 
 .PARAMETER VariableName
@@ -28,7 +28,7 @@ A valid personal access token with at least read access for reelase definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Add-AzDoReleasePipelineVariable -ProjectUrl https://dev.azure.com/<organizztion>/<project> -DefinitionName <reelase defintiion name> -VariableName <variable name> -PAT <personal access token>
+Add-AzDoReleasePipelineVariable -ProjectUrl https://dev.azure.com/<organizztion>/<project> -ReleaseDefinitionName <reelase defintiion name> -VariableName <variable name> -PAT <personal access token>
 
 .NOTES
 
@@ -44,12 +44,12 @@ function Remove-AzDoReleasePipelineVariable()
     )]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [int][parameter(ParameterSetName='Id',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionId = $null,
-        [string][parameter(ParameterSetName='Name',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionName = $null,
-        [string][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [int][parameter(ParameterSetName='Id', ValueFromPipelineByPropertyName = $true)]$ReleaseDefinitionId = $null,
+        [string][parameter(ParameterSetName='Name', ValueFromPipelineByPropertyName = $true)]$ReleaseDefinitionName = $null,
+        [string][parameter( ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
         [switch]$All,
-        [string]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -73,13 +73,13 @@ function Remove-AzDoReleasePipelineVariable()
     {
         $definition = $null
 
-        if ($DefinitionId -ne $null -and $DefinitionId -gt 0)
+        if ($ReleaseDefinitionId -ne $null -and $ReleaseDefinitionId -gt 0)
         {
-            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -Id $DefinitionId -PAT $PAT -ExpandFields "variables"
+            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -ReleaseDefinitionId $ReleaseDefinitionId -PAT $PAT -ExpandFields "variables"
         }
-        elseif (-Not [string]::IsNullOrEmpty($DefinitionName))
+        elseif (-Not [string]::IsNullOrEmpty($ReleaseDefinitionName))
         {
-            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -Name $DefinitionName -PAT $PAT -ExpandFields "variables"
+            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -ReleaseDefinitionName $ReleaseDefinitionName -PAT $PAT -ExpandFields "variables"
         }
 
         if ($definition -eq $null) { throw "Could not find a valid release definition.  Check your parameters and try again";}

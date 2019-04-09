@@ -9,8 +9,8 @@ This command will import all the variables in a CSV into a specific Azure DevOps
 .PARAMETER ProjectUrl
 The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
 
-.PARAMETER csvFile
-The path to the CSV file
+.PARAMETER CsvFile
+The path to the CSV file.  Format is: Variable, Value, Env, Secret)
 
 .PARAMETER VariableGroupName
 The name of the variable group in the library to import the values into 
@@ -31,7 +31,7 @@ A valid personal access token with at least read access for build definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Import-AzDoLibraryVariables -ProjectUrl https://dev.azure.com/<organizztion>/<project> -csvFile <csv file to import> -VariableGroupName <variable group to import into> -EnvironmentNameFilter <
+Import-AzDoLibraryVariables -ProjectUrl https://dev.azure.com/<organizztion>/<project> -CsvFile <csv file to import> -VariableGroupName <variable group to import into> -EnvironmentNameFilter <
 
 .NOTES
 
@@ -44,13 +44,13 @@ function Import-AzDoLibraryVariables()
     [CmdletBinding()]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [string][parameter(Mandatory = $true)]$csvFile,
-        [string][parameter(Mandatory = $true)]$VariableGroupName,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [string][parameter(Mandatory = $true)]$CsvFile,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$VariableGroupName,
         [string]$EnvironmentNameFilter = "*",
         [switch]$Reset,
         [switch]$Force,
-        [string]$PAT = "",
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT = "",
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -71,15 +71,15 @@ function Import-AzDoLibraryVariables()
     {
         if ([string]::IsNullOrEmpty($EnvironmentNameFilter)) { $EnvironmentNameFilter = "*" }
 
-        Write-Verbose "Importing CSV File for env $EnvironmentNameFilter : $csvFile"
-        $csv = Import-Csv $csvFile
+        Write-Verbose "Importing CSV File for env $EnvironmentNameFilter : $CsvFile"
+        $csv = Import-Csv $CsvFile
 
         $variables = @()
         $csv | ? { $_.Env -eq $EnvironmentNameFilter -or $_.Env -like $EnvironmentNameFilter } | % { 
             $variables += [pscustomobject]@{
                 Name = $_.Variable;
                 Value = $_.Value;
-                Secret = $false;
+                Secret = $_.IsSecret;
             }
         }
 
@@ -91,6 +91,9 @@ function Import-AzDoLibraryVariables()
 
         Write-Host "`tImported $($variables.Count) variables" -ForegroundColor Green
     }
-    END { }
+    END
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

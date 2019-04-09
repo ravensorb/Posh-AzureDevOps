@@ -9,10 +9,10 @@ The command will retrieve a full release definition (if it exists)
 .PARAMETER ProjectUrl
 The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
 
-.PARAMETER Name
+.PARAMETER ReleaseDefinitionName
 The name of the release definition to retrieve (use on this OR the id parameter)
 
-.PARAMETER Id
+.PARAMETER ReleaseDefinitionId
 The id of the release definition to retrieve (use on this OR the name parameter)
 
 .PARAMETER ExpandFields
@@ -25,7 +25,7 @@ A valid personal access token with at least read access for release definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoReleaseDefinition -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Name <release defintiion name> -PAT <personal access token>
+Get-AzDoReleaseDefinition -ProjectUrl https://dev.azure.com/<organizztion>/<project> -ReleaseDefinitionName <release defintiion name> -PAT <personal access token>
 
 .NOTES
 
@@ -40,11 +40,11 @@ function Get-AzDoReleaseDefinition()
     )]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [string][parameter(ParameterSetName='Name')]$Name,
-        [int][parameter(ParameterSetName='ID')]$Id,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [string][parameter(ParameterSetName='Name', ValueFromPipelinebyPropertyName = $true)]$ReleaseDefinitionName,
+        [int][parameter(ParameterSetName='ID', ValueFromPipelinebyPropertyName = $true)]$ReleaseDefinitionId,
         [string]$ExpandFields,
-        [string]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -56,7 +56,7 @@ function Get-AzDoReleaseDefinition()
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if ($Id -eq $null -and [string]::IsNullOrEmpty($Name)) { throw "Definition ID or Name must be specified";}
+        if ($ReleaseDefinitionId -eq $null -and [string]::IsNullOrEmpty($ReleaseDefinitionName)) { throw "Definition ID or Name must be specified";}
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
@@ -77,13 +77,13 @@ function Get-AzDoReleaseDefinition()
             $apiParams += "Expand=$($ExpandFields)"
         }
 
-        if ($Id -ne $null -and $Id -ne 0) 
+        if ($ReleaseDefinitionId -ne $null -and $ReleaseDefinitionId -ne 0) 
         {
-            $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions/$($Id)" -QueryStringParams $apiParams
+            $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions/$($ReleaseDefinitionId)" -QueryStringParams $apiParams
         }
         else 
         {
-            $apiParams += "searchText=$($Name)"
+            $apiParams += "searchText=$($ReleaseDefinitionName)"
 
             $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions" -QueryStringParams $apiParams
         }
@@ -98,7 +98,7 @@ function Get-AzDoReleaseDefinition()
         {
             foreach($rd in $releaseDefinitions.value)
             {
-                if ($rd.name -like $Name) {
+                if ($rd.name -like $ReleaseDefinitionName) {
                     Write-Verbose "Release Defintion Found $($rd.name) found."
 
                     $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions/$($rd.id)" -QueryStringParams $apiParams
@@ -107,13 +107,13 @@ function Get-AzDoReleaseDefinition()
                     return $releaseDefinitions
                 }
             }
-            Write-Verbose "Release definition $Name not found."
+            Write-Verbose "Release definition $ReleaseDefinitionName not found."
         } 
         elseif ($releaseDefinitions -ne $null) {
             return $releaseDefinitions
         }
 
-        Write-Verbose "Release definition $Id not found."
+        Write-Verbose "Release definition $ReleaseDefinitionId not found."
         
         return $null
     }

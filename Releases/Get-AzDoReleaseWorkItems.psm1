@@ -1,25 +1,25 @@
 <#
 
 .SYNOPSIS
-Retrieve the work items related to  the specified build 
+Retrieve the work items related to  the specified release 
 
 .DESCRIPTION
-The command will retrieve the work items associated with the specified build 
+The command will retrieve the work items associated with the specified release 
 
 .PARAMETER ProjectUrl
 The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
 
-.PARAMETER BuildId
-The id of the build to retrieve (use on this OR the name parameter)
+.PARAMETER ReleaseId
+The id of the release to retrieve (use on this OR the name parameter)
 
 .PARAMETER PAT
-A valid personal access token with at least read access for build definitions
+A valid personal access token with at least read access for releases
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoBuildWorkItems -ProjectUrl https://dev.azure.com/<organizztion>/<project> -BuildId <build id> -PAT <personal access token>
+Get-AzDoBuildWorkItems -ProjectUrl https://dev.azure.com/<organizztion>/<project> -ReleaseId <release id> -PAT <personal access token>
 
 .NOTES
 
@@ -35,7 +35,7 @@ function Get-AzDoBuildWorkItems()
     param
     (
         [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
-        [int][parameter(ParameterSetName='ID', Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$BuildId,
+        [int][parameter(ParameterSetName='ID', ValueFromPipelinebyPropertyName = $true)]$ReleaseId,
         [int]$Count = 1,
         [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
@@ -49,7 +49,7 @@ function Get-AzDoBuildWorkItems()
     
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if ($BuildId -eq $null) { throw "Build ID must be specified"; }
+        if ($ReleaseId -eq $null -and $build -eq $null) { throw "Build ID or Build object must be specified"; }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "`tParameter Values"
@@ -63,17 +63,17 @@ function Get-AzDoBuildWorkItems()
 
         $apiParams += "`$top=$($Count)"
 
-        $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -BaseApiPath "/_apis/build/builds/$($BuildId)/workitems" -QueryStringParams $apiParams -ApiVersion $ApiVersion
+        $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -BaseApiPath "/_apis/release/Releases/$($ReleaseId)/workitems" -QueryStringParams $apiParams -ApiVersion $ApiVersion
 
         $buildWorkItems = Invoke-RestMethod $apiUrl -Headers $headers
 
-        Write-Verbose "---------BUILD WORKITEMS---------"
+        Write-Verbose "---------RELEASE WORKITEMS---------"
         Write-Verbose $buildWorkItems
-        Write-Verbose "---------BUILD WORKITEMS---------"
+        Write-Verbose "---------RELEASE WORKITEMS---------"
 
         #Write-Verbose "Build status $($build.id) not found."
         if (-Not $buildWorkItems -or $buildWorkItems.count -eq 0) {
-            Write-Verbose "No Workitems Found Related to build $BuildId"
+            Write-Verbose "No Workitems Found Related to release $ReleaseId"
 
             return $null
         }

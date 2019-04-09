@@ -3,7 +3,7 @@ function Get-AzDoApiUrl()
     [CmdletBinding()]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
         [string][parameter(Mandatory = $true)]$BaseApiPath,
         [string[]]$QueryStringParams = $null,
         [string]$ApiVersion = $global:AzDoApiVersion

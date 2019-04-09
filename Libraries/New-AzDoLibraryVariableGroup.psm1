@@ -1,16 +1,19 @@
 <#
 
 .SYNOPSIS
-Get all variables in a specific Azure DevOps libary
+Create a new Library Variable Group
 
 .DESCRIPTION
-The  command will retreive all variables to the specificed library
+The command will create a new library variable group
 
 .PARAMETER ProjectUrl
 The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
 
-.PARAMETER Name
+.PARAMETER VariableGroupName
 The name of the variable group to retrieve
+
+.PARAMETER Description
+A description for this library group
 
 .PARAMETER PAT
 A valid personal access token with at least read access for build definitions
@@ -19,7 +22,7 @@ A valid personal access token with at least read access for build definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-New-AzDoLibraryVariableGroup -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Name <variable group name> -PAT <personal access token>
+New-AzDoLibraryVariableGroup -ProjectUrl https://dev.azure.com/<organizztion>/<project> -VariableGroupName <variable group name> -PAT <personal access token>
 
 .NOTES
 
@@ -32,10 +35,10 @@ function New-AzDoLibraryVariableGroup()
     [CmdletBinding()]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [string][parameter(Mandatory = $true)]$Name,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$VariableGroupName,
         [string]$Description,
-        [string]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -58,34 +61,36 @@ function New-AzDoLibraryVariableGroup()
     {
         $method = "Post"
 
-        $variableGroup = Get-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -Name $Name -PAT $PAT -ApiVersion $ApiVersion
+        $variableGroup = Get-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -VariableGroupName $VariableGroupName -PAT $PAT
 
         if ($variableGroup) 
         {
-            Write-Verbose "Variable group $Name exists"
+            Write-Verbose "Variable group $VariableGroupName exists"
 
             return $variableGroup
         }
 
-        Write-Verbose "Variable group $Name not found."
+        Write-Verbose "Variable group $VariableGroupName not found."
 
-        Write-Verbose "Create variable group $Name."
+        Write-Verbose "Create variable group $VariableGroupName."
 
-        $variableGroup = @{name=$Name;description=$Description;variables=New-Object PSObject;}
+        $variableGroup = @{name=$VariableGroupName;description=$Description;variables=New-Object PSObject;}
         $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups"
 
         $variableGroup.variables | Add-Member -Name "NewVariable1" -MemberType NoteProperty -Value @{value="";isSecret=$false} -Force
 
-        #Write-Verbose "Persist variable group $Name."
+        #Write-Verbose "Persist variable group $VariableGroupName."
         $body = $variableGroup | ConvertTo-Json -Depth 10 -Compress
         
         #Write-Verbose $body
         $response = Invoke-RestMethod $apiUrl -Method $method -Body $body -ContentType 'application/json' -Header $headers    
-    }
-    END
-    {
+
         Write-Verbose "Response: $($response.id)"
 
         $response
+    }
+    END
+    {
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
     }
 }

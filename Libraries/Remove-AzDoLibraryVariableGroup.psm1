@@ -9,7 +9,7 @@ The command will remove the specificed library group
 .PARAMETER ProjectUrl
 The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
 
-.PARAMETER Name
+.PARAMETER VaraibleGroupName
 The name of the variable group to remove
 
 .PARAMETER PAT
@@ -19,7 +19,7 @@ A valid personal access token with at least read access for build definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Remove-AzDoLibraryVariableGroup -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Name <variable group name> -PAT <personal access token>
+Remove-AzDoLibraryVariableGroup -ProjectUrl https://dev.azure.com/<organizztion>/<project> -VariableGroupName <variable group name> -PAT <personal access token>
 
 .NOTES
 
@@ -32,9 +32,9 @@ function Remove-AzDoLibraryVariableGroup()
     [CmdletBinding()]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [string][parameter(Mandatory = $true)]$Name,
-        [string]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)][Alias("name")]$VariableGroupName,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion
     )
     BEGIN
@@ -57,30 +57,32 @@ function Remove-AzDoLibraryVariableGroup()
     {
         $method = "DELETE"
 
-        $variableGroup = Get-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -Name $Name -PAT $PAT -ApiVersion $ApiVersion
+        $variableGroup = Get-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -VariableGroupName $VariableGroupName -PAT $PAT -ApiVersion $ApiVersion
 
         if (-Not $variableGroup) 
         {
-            Write-Verbose "Variable group $Name does not exist"
+            Write-Verbose "Variable group $VariableGroupName does not exist"
 
             return
         }
 
-        Write-Verbose "Variable group $Name not found."
+        Write-Verbose "Variable group $VariableGroupName not found."
 
-        Write-Verbose "Create variable group $Name."
+        Write-Verbose "Create variable group $VariableGroupName."
 
         # DELETE https://dev.azure.com/{organization}/{project}/_apis/distributedtask/variablegroups/{groupId}?api-version=5.0-preview.1
         $apiUrl = Get-AzDoApiUrl -ProjectUrl $ProjectUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups/$($variableGroup.id)"
 
         #Write-Verbose $body
         $response = Invoke-RestMethod $apiUrl -Method $method -ContentType 'application/json' -Header $headers    
-    }
-    END
-    {
+
         Write-Verbose "Response: $($response.id)"
 
         #$response
         return $true
+    }
+    END
+    {
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
     }
 }

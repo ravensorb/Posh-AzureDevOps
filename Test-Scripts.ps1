@@ -17,7 +17,7 @@ param
     [string]$LibraryVariableName = $global:AzDoTestLibraryVariableName,
     [string]$LibraryVariableValue = $global:AzDoTestLibraryVariableValue,
 
-    [string]$PAT = $global:AzDoTestPAT,
+    [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT = $global:AzDoTestPAT,
     [string]$ApiVersion = $global:AzDoApiVersion
 )
 BEGIN
@@ -50,22 +50,22 @@ PROCESS
     ##################################################################################################################
 
     Write-Host "`tGet Build Definition By Name: " -NoNewline
-    $buildDefinitionTestResult = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -Name $BuildDefinitionName
+    $buildDefinitionTestResult = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -BuildDefinitionName $BuildDefinitionName
     if ($buildDefinitionTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
     Write-Host "`tGet Build Definition By Id: " -NoNewline
-    $buildDefinitionTestResult = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -Id $buildDefinitionTestResult.id
+    $buildDefinitionTestResult = Get-AzDoBuildDefinition -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -BuildDefinitionId $buildDefinitionTestResult.id
     if ($buildDefinitionTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     Write-Host "`tGet Build Pipeline Variables: " -NoNewline
-    $buildVaraibleTestResult = Get-AzDoBuildPipelineVariables -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -DefinitionName $BuildDefinitionName 
+    $buildVaraibleTestResult = Get-AzDoBuildPipelineVariables -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -BuildDefinitionName $BuildDefinitionName 
     if ($buildVaraibleTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     Write-Host "`tAdd Build Pipeline Variable: " -NoNewline
-    $buildAddVaraibleTestResult = Add-AzDoBuildPipelineVariable -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -DefinitionName $BuildDefinitionName -VariableName $BuildVariableName -VariableValue $([DateTime]::Now.ToString())
+    $buildAddVaraibleTestResult = Add-AzDoBuildPipelineVariable -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -BuildDefinitionName $BuildDefinitionName -VariableName $BuildVariableName -VariableValue $([DateTime]::Now.ToString())
     if ($buildAddVaraibleTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     Write-Host "`tRemove Build Pipeline Variable: " -NoNewline
-    $buildRemoveVaraibleTestResult = Remove-AzDoBuildPipelineVariable -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -DefinitionName $BuildDefinitionName -VariableName $BuildVariableName
+    $buildRemoveVaraibleTestResult = Remove-AzDoBuildPipelineVariable -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -BuildDefinitionName $BuildDefinitionName -VariableName $BuildVariableName
     if ($buildRemoveVaraibleTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     ##################################################################################################################
@@ -74,7 +74,7 @@ PROCESS
     ##################################################################################################################
 
     Write-Host "`tAdd Library Group: " -NoNewline
-    $libraryVariableGroupRestResult = New-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -Name $LibraryVariableGroupName 
+    $libraryVariableGroupRestResult = New-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -VariableGroupName $LibraryVariableGroupName 
     if ($libraryVariableGroupRestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     Write-Host "`tAdd Library Variable: " -NoNewline
@@ -82,15 +82,19 @@ PROCESS
     if ($libraryVariableGroupRestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     Write-Host "`tGet Library Variable Group: " -NoNewline
-    $libraryVariableGroupRestResult = Get-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -Name $LibraryVariableGroupName
+    $libraryVariableGroupRestResult = Get-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -VariableGroupName $LibraryVariableGroupName
     if ($libraryVariableGroupRestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     Write-Host "`tRemove Library Variable: " -NoNewline
     $libraryVariableGroupRestResult = Remove-AzDoLibraryVariable -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -VariableGroupName $LibraryVariableGroupName -VariableName $LibraryVariableName
     if ($libraryVariableGroupRestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
+    #Write-Host "`tImport Library Variable: " -NoNewline
+    #$libraryVariableGroupImportRestResult = Import-AzDoLibraryVariables -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -VariableGroupName $LibraryVariableGroupName
+    #if ($libraryVariableGroupImportRestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
+
     Write-Host "`tRemove Library Group: " -NoNewline
-    $libraryVariableGroupRestResult = Remove-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -Name $LibraryVariableGroupName 
+    $libraryVariableGroupRestResult = Remove-AzDoLibraryVariableGroup -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -VariableGroupName $LibraryVariableGroupName 
     if ($libraryVariableGroupRestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     ##################################################################################################################
@@ -99,22 +103,22 @@ PROCESS
     ##################################################################################################################
 
     Write-Host "`tGet Release Definition By Name: " -NoNewline
-    $releaseDefinitionTestResult = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -Name $ReleaseDefinitionName
+    $releaseDefinitionTestResult = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -ReleaseDefinitionName $ReleaseDefinitionName
     if ($releaseDefinitionTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
     Write-Host "`tGet Release Definition By ID: " -NoNewline
-    $releaseDefinitionTestResult = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -Id $releaseDefinitionTestResult.id
+    $releaseDefinitionTestResult = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -ReleaseDefinitionId $releaseDefinitionTestResult.id
     if ($releaseDefinitionTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     Write-Host "`tAdd Release Variable: " -NoNewline
-    $releaseVaraibleTestResult = Add-AzDoReleasePipelineVariable -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -DefinitionName $ReleaseDefinitionName -VariableName $ReleaseVariableName -VariableValue $ReleaseVariableValue
+    $releaseVaraibleTestResult = Add-AzDoReleasePipelineVariable -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -ReleaseDefinitionName $ReleaseDefinitionName -VariableName $ReleaseVariableName -VariableValue $ReleaseVariableValue
     if ($releaseVaraibleTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     Write-Host "`tGet Release Variable: " -NoNewline
-    $releaseVaraibleTestResult = Get-AzDoReleasePipelineVariables -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -DefinitionName $ReleaseDefinitionName
+    $releaseVaraibleTestResult = Get-AzDoReleasePipelineVariables -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -ReleaseDefinitionName $ReleaseDefinitionName
     if ($releaseVaraibleTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     Write-Host "`tRemove Release Variable: " -NoNewline
-    $releaseVaraibleTestResult = Remove-AzDoReleasePipelineVariable -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -DefinitionName $ReleaseDefinitionName -VariableName $ReleaseVariableName
+    $releaseVaraibleTestResult = Remove-AzDoReleasePipelineVariable -ProjectUrl $ProjectUrl -PAT $PAT -ApiVersion $ApiVersion -ReleaseDefinitionName $ReleaseDefinitionName -VariableName $ReleaseVariableName
     if ($releaseVaraibleTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     ##################################################################################################################

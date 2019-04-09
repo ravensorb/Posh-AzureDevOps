@@ -4,7 +4,7 @@
 Add/Replace a new variable to a specific Azure DevOps libary
 
 .DESCRIPTION
-The  command will add/replace a variable to the specificed library
+The command will add/replace a variable to the specificed library
 
 .PARAMETER ProjectUrl
 The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
@@ -50,15 +50,15 @@ function Add-AzDoLibraryVariable()
     [CmdletBinding()]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [string][parameter(Mandatory = $true)]$VariableGroupName,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$VariableGroupName,
         [string]$VariableGroupDescription,
-        [string][parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
-        [string][parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("value")]$VariableValue,
-        [bool][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$Secret,
+        [string][parameter(Mandatory = $true,  ValueFromPipelineByPropertyName = $true)]$VariableName,
+        [string][parameter(Mandatory = $true,  ValueFromPipelineByPropertyName = $true)]$VariableValue,
+        [bool][parameter(ValueFromPipelineByPropertyName = $true)]$Secret,
         [switch]$Reset,
         [switch]$Force,
-        [string]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -124,11 +124,12 @@ function Add-AzDoLibraryVariable()
         #Write-Verbose $body
         $response = Invoke-RestMethod $apiUrl -Method $method -Body $body -ContentType 'application/json' -Header $headers
         
-    }
-    END
-    {
         Write-Verbose "Response: $($response.id)"
 
         $response
+    }
+    END
+    {
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
     }
 }

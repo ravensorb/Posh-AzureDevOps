@@ -9,10 +9,10 @@ The  command will retrieve all of the variables in a specific release pipeline
 .PARAMETER ProjectUrl
 The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
 
-.PARAMETER DefinitionName
+.PARAMETER ReleaseDefinitionName
 The name of the release definition to retrieve (use on this OR the id parameter)
 
-.PARAMETER DefinitionId
+.PARAMETER ReleaseDefinitionId
 The id of the release definition to retrieve (use on this OR the name parameter)
 
 .PARAMETER VariableName
@@ -25,7 +25,7 @@ A valid personal access token with at least read access for release definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoReleasePipelineVariables -ProjectUrl https://dev.azure.com/<organizztion>/<project> -DefinitionName <release defintiion name> -VariableName <variable name> -PAT <personal access token>
+Get-AzDoReleasePipelineVariables -ProjectUrl https://dev.azure.com/<organizztion>/<project> -ReleaseDefinitionName <release defintiion name> -VariableName <variable name> -PAT <personal access token>
 
 .NOTES
 
@@ -40,12 +40,12 @@ function Get-AzDoReleasePipelineVariables()
     )]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
-        [int][parameter(ParameterSetName='Id',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionId = $null,
-        [string][parameter(ParameterSetName='Name',ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]$DefinitionName = $null,
-        [string][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
-        [string][parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("env")]$EnvironmentName = $null,
-        [string]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [int][parameter(ParameterSetName='Id', ValueFromPipelineByPropertyName = $true)]$ReleaseDefinitionId = $null,
+        [string][parameter(ParameterSetName='Name', ValueFromPipelineByPropertyName = $true)]$ReleaseDefinitionName = $null,
+        [string][parameter(ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
+        [string][parameter(ValueFromPipelineByPropertyName = $true)][Alias("env")]$EnvironmentName = $null,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN
@@ -60,7 +60,7 @@ function Get-AzDoReleasePipelineVariables()
         if ([string]::IsNullOrEmpty($ProjectUrl)) { throw "Invalid Project Url";  }
         if ([string]::IsNullOrEmpty($EnvironmentName)) { $EnvironmentName = "*" }
       
-        if ($DefinitionId -eq $null -and [string]::IsNullOrEmpty($DefinitionName)) { throw "Definition ID or Name must be specified"; }
+        if ($ReleaseDefinitionId -eq $null -and [string]::IsNullOrEmpty($ReleaseDefinitionName)) { throw "Definition ID or Name must be specified"; }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
@@ -74,13 +74,13 @@ function Get-AzDoReleasePipelineVariables()
     {
         $definition = $null
 
-        if ($DefinitionId -ne $null -and $DefinitionId -gt 0)
+        if ($ReleaseDefinitionId -ne $null -and $ReleaseDefinitionId -gt 0)
         {
-            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -Id $DefinitionId -PAT $PAT
+            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -ReleaseDefinitionId $ReleaseDefinitionId -PAT $PAT
         }
-        elseif ($DefinitionName -ne $null)
+        elseif ($ReleaseDefinitionName -ne $null)
         {
-            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -Name $DefinitionName -PAT $PAT
+            $definition = Get-AzDoReleaseDefinition -ProjectUrl $ProjectUrl -ReleaseDefinitionName $ReleaseDefinitionName -PAT $PAT
         }
 
         if ($definition -eq $null) { throw "Could not find a valid release definition.  Check your parameters and try again"}

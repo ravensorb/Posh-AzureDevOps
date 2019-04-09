@@ -19,7 +19,7 @@ A valid personal access token with at least read access for build definitions
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoRepoBranches -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Name <git repo name> -PAT <personal access token>
+Get-AzDoRepoBranches -ProjectUrl https://dev.azure.com/<organizztion>/<project> -VariableGroupName <git repo name> -PAT <personal access token>
 
 .NOTES
 
@@ -32,9 +32,9 @@ function Get-AzDoRepoBranches()
     [CmdletBinding()]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
         [string]$Name,
-        [string]$PAT,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion
     )
     BEGIN

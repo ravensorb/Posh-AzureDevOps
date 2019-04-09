@@ -23,7 +23,7 @@ function Get-AzDoRmUrlFromProjectUrl()
     [CmdletBinding()]
     param
     (
-        [string][parameter(Mandatory = $true)]$ProjectUrl
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl
     )
     BEGIN
     {
