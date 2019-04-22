@@ -23,10 +23,14 @@ https://github.com/ravensorb/Posh-AzureDevOps
 #>
 function Connect-AzDo()
 {
-    [CmdletBinding()]
+    [CmdletBinding(
+        DefaultParameterSetName = "FullUrl"
+    )]
     param
     (
-        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [string][parameter(ParameterSetName = "FullUrl", Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [string][parameter(ParameterSetName = "OrgUrlAndProjectName", Mandatory = $true, ValueFromPipelineByPropertyName)]$OrganizationUrl,
+        [string][parameter(ParameterSetName = "OrgUrlAndProjectName", Mandatory = $true, ValueFromPipelineByPropertyName)]$ProjectName,
         [string][parameter(Mandatory = $false, ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string][Parameter(DontShow)]$OAuthToken,
         [switch][parameter(DontShow)]$LocalOnly
@@ -44,15 +48,20 @@ function Connect-AzDo()
     }
     PROCESS
     {
-        $headers = Get-AzDoHttpHeader -ProjectUrl $ProjectUrl -PAT $PAT
+        if (-Not [string]::IsNullOrEmpty($ProjectUrl))
+        {
+            $azdoConection = [PoshAzDo.AzDoConnectObject]::CreateFromUrl($ProjectUrl)
+        } 
+        elseif (-Not [string]::IsNullOrEmpty($OrganizationUrl))
+        {
+            $azdoConection = [PoshAzDo.AzDoConnectObject]::CreateFromUrl($OrganizationUrl)
+            $azdoConection.ProjectName = $ProjectName
+        }
 
-        $azdoConection = [PoshAzDo.AzDoConnectObject]::new()
+        $headers = Get-AzDoHttpHeader -ProjectUrl $azdoConection.ProjectUrl -PAT $PAT
 
-        $azdoConection.ProjectUrl = $ProjectUrl
-        $azdoConection.ReleaseManagementUrl = (Get-AzDoRmUrlFromProjectUrl -ProjectUrl $ProjectUrl)
         $azdoConection.PAT = $PAT
         $azdoConection.HttpHeaders = $headers
-        $azdoConection.CreatedOn = [DateTime]::Now
 
         if (-Not $LocalOnly)
         {

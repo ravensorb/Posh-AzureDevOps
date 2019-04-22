@@ -5,6 +5,12 @@ VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PoshAzDoClasses", "Classes\PoshAzDoClasses.csproj", "{88BA6847-69B2-4794-A11B-1A66B92DA412}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{5EBFEF62-79BC-4C83-A8C9-7CC47FF4B37B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{EAF45FB3-3922-4E4E-AEC0-384404CB6E2E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Classes.UnitTests", "Classes.UnitTests\Classes.UnitTests.csproj", "{669EDA62-6C2A-4712-9401-D6A8BAC481CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +21,17 @@ Global
 		{88BA6847-69B2-4794-A11B-1A66B92DA412}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88BA6847-69B2-4794-A11B-1A66B92DA412}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{88BA6847-69B2-4794-A11B-1A66B92DA412}.Release|Any CPU.Build.0 = Release|Any CPU
+		{669EDA62-6C2A-4712-9401-D6A8BAC481CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{669EDA62-6C2A-4712-9401-D6A8BAC481CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{669EDA62-6C2A-4712-9401-D6A8BAC481CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{669EDA62-6C2A-4712-9401-D6A8BAC481CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{88BA6847-69B2-4794-A11B-1A66B92DA412} = {5EBFEF62-79BC-4C83-A8C9-7CC47FF4B37B}
+		{669EDA62-6C2A-4712-9401-D6A8BAC481CF} = {EAF45FB3-3922-4E4E-AEC0-384404CB6E2E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F33D39B0-861A-420F-A2C6-7042900B9236}
