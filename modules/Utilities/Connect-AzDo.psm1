@@ -58,6 +58,12 @@ function Connect-AzDo()
             $azdoConection.ProjectName = $ProjectName
         }
 
+        Write-Verbose "Connection:"
+        Write-Verbose "Organization Name $($azdoConection.OrganizationName)"
+        Write-Verbose "Project Name: $($azdoConection.ProjectName)"
+        Write-Verbose "Project Url: $($azdoConection.ProjectUrl)"
+        Write-Verbose "Release Management Url: $($azdoConection.ReleaseManagementUrl)"
+
         $headers = Get-AzDoHttpHeader -ProjectUrl $azdoConection.ProjectUrl -PAT $PAT
 
         $azdoConection.PAT = $PAT

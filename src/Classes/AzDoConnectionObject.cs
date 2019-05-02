@@ -55,6 +55,8 @@ namespace PoshAzDo
 
 			sb.AppendFormat("Organziation Name: {0}", OrganizationName);
 			sb.AppendLine();
+			sb.AppendFormat("Organziation Name: {0}", OrganizationUrl);
+			sb.AppendLine();
 			sb.AppendFormat("Project Name: {0}", ProjectName);
 			sb.AppendLine();
 			sb.AppendFormat("Project Url: {0}", ProjectUrl);
