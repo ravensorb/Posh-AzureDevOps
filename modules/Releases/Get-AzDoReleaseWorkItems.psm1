@@ -19,7 +19,7 @@ A valid personal access token with at least read access for releases
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoBuildWorkItems -ProjectUrl https://dev.azure.com/<organizztion>/<project> -ReleaseId <release id> -PAT <personal access token>
+Get-AzDoReleaseWorkItems -ProjectUrl https://dev.azure.com/<organizztion>/<project> -ReleaseId <release id> -PAT <personal access token>
 
 .NOTES
 
@@ -27,7 +27,7 @@ Get-AzDoBuildWorkItems -ProjectUrl https://dev.azure.com/<organizztion>/<project
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoBuildWorkItems()
+function Get-AzDoReleaseWorkItems()
 {
     [CmdletBinding(
         DefaultParameterSetName='ID'
@@ -51,7 +51,8 @@ function Get-AzDoBuildWorkItems()
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
         }        
     
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
+        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1"}
 
         if (-Not (Test-Path varaible:$AzDoConnection) -or $AzDoConnection -eq $null)
         {
@@ -77,9 +78,9 @@ function Get-AzDoBuildWorkItems()
     {
         $apiParams = @()
 
-        $apiParams += "`$top=$($Count)"
+        #$apiParams += "`$top=$($Count)"
 
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ReleaseManagementUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/Releases/$($ReleaseId)/workitems" -QueryStringParams $apiParams
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ReleaseManagementUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/Release/releases/$($ReleaseId)/workitems" -QueryStringParams $apiParams
 
         $buildWorkItems = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 
