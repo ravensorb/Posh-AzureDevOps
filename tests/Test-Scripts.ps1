@@ -129,8 +129,28 @@ PROCESS
     Write-Host "Testing Repo API Calls" -ForegroundColor Green
     ##################################################################################################################
     Write-Host "`tGet Repo Branches: " -NoNewline
-    $repoTestResult = Get-AzDoRepoBranches -AzDoConnection $AzDoConnection  -ApiVersion $ApiVersion -Name $RepoName
+    $repoTestResult = Get-AzDoRepoBranches -AzDoConnection $AzDoConnection -ApiVersion $ApiVersion -Name $RepoName
     if ($repoTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
+    ##################################################################################################################
+    ##################################################################################################################
+    Write-Host "Testing Project API Calls" -ForegroundColor Green
+    ##################################################################################################################
+    Write-Host "`tGet Projects: " -NoNewline
+    $projectsTestResult = Get-AzDoProjects -AzDoConnection $AzDoConnection -ApiVersion $ApiVersion
+    if ($projectsTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
+    
+    ##################################################################################################################
+    ##################################################################################################################
+    Write-Host "Testing Security API Calls" -ForegroundColor Green
+    ##################################################################################################################
+    Write-Host "`tGet Teams: " -NoNewline
+    $teamsTestResult = Get-AzDoTeams -AzDoConnection $AzDoConnection -ApiVersion $ApiVersion
+    if ($teamsTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
+    
+    Write-Host "`tGet Security Groups: " -NoNewline
+    $securityGroupsTestResult = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection -ApiVersion $ApiVersion
+    if ($securityGroupsTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
+    
 }
 END { }

@@ -81,7 +81,7 @@ function Add-AzDoBuildPipelineVariable()
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -or $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {

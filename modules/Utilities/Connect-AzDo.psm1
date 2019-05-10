@@ -50,35 +50,50 @@ function Connect-AzDo()
     {
         if (-Not [string]::IsNullOrEmpty($ProjectUrl))
         {
-            $azdoConection = [PoshAzDo.AzDoConnectObject]::CreateFromUrl($ProjectUrl)
+            $azdoConnection = [PoshAzDo.AzDoConnectObject]::CreateFromUrl($ProjectUrl)
         } 
         elseif (-Not [string]::IsNullOrEmpty($OrganizationUrl))
         {
-            $azdoConection = [PoshAzDo.AzDoConnectObject]::CreateFromUrl($OrganizationUrl)
-            $azdoConection.ProjectName = $ProjectName
+            $azdoConnection = [PoshAzDo.AzDoConnectObject]::CreateFromUrl($OrganizationUrl)
+            $azdoConnection.ProjectName = $ProjectName
         }
 
-        Write-Verbose "Connection:"
-        Write-Verbose "Organization Name $($azdoConection.OrganizationName)"
-        Write-Verbose "Project Name: $($azdoConection.ProjectName)"
-        Write-Verbose "Project Url: $($azdoConection.ProjectUrl)"
-        Write-Verbose "Release Management Url: $($azdoConection.ReleaseManagementUrl)"
+        $headers = Get-AzDoHttpHeader -ProjectUrl $azdoConnection.ProjectUrl -PAT $PAT
 
-        $headers = Get-AzDoHttpHeader -ProjectUrl $azdoConection.ProjectUrl -PAT $PAT
+        $azdoConnection.PAT = $PAT
+        $azdoConnection.HttpHeaders = $headers
 
-        $azdoConection.PAT = $PAT
-        $azdoConection.HttpHeaders = $headers
+        try {
+            $projectDetails = Get-AzDoProjectDetails -AzDoConnection $azdoConnection -ProjectName $azdoConnection.ProjectName
+            if ($projectDetails -ne $null) {
+                $azdoConnection.ProjectId = $projectDetails.id
+            }
+        }
+        catch {
+            throw "Project $($azdoConnection.ProjectName) does not exist"            
+        }
+
+        $azdoConnection.ProjectDescriptor = Get-AzDoDescriptors -AzDoConnection $azdoConnection
 
         if (-Not $LocalOnly)
         {
             Write-Verbose "`tStoring connection in global scope"
-            $Global:AzDoActiveConnection = $azdoConection
+            $Global:AzDoActiveConnection = $azdoConnection
         }
 
-        $azdoConection
+        $azdoConnection
     }
     END
     { 
+        Write-Verbose "Connection:"
+        Write-Verbose "Organization Name: $($azdoConnection.OrganizationName)"
+        Write-Verbose "Organization Url: $($azdoConnection.OrganizationUrl)"
+        Write-Verbose "Project Name: $($azdoConnection.ProjectName)"
+        Write-Verbose "Project Id: $($azdoConnection.ProjectId)"
+        Write-Verbose "Project Descriptor: $($azdoConnection.ProjectDescriptor)"
+        Write-Verbose "Project Url: $($azdoConnection.ProjectUrl)"
+        Write-Verbose "Release Management Url: $($azdoConnection.ReleaseManagementUrl)"
+
         Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
     }
 }

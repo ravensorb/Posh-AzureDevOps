@@ -1,10 +1,10 @@
 <#
 
 .SYNOPSIS
-This commend provides retrieve members for a specifc Team from Azure DevOps
+This commend provides retrieve Projects from Azure DevOps
 
 .DESCRIPTION
-The command will retrieve members for the Azure DevOps teams specified 
+The command will retrieve Azure DevOps projects (if they exists) 
 
 .PARAMETER AzDoConnect
 A valid AzDoConnection object
@@ -22,20 +22,17 @@ Allows for specifying a specific version of the api to use (default is 5.0)
 The name of the build definition to retrieve (use on this OR the id parameter)
 
 .EXAMPLE
-Get-AzDoTeamMemebers -ProjectUrl https://dev.azure.com/<organizztion>/<project> -TeamName <name>
+Get-AzDoprojects
 
-.EXAMPLE
-Get-AzDoTeamMemebers -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Teamid <id>
 .NOTES
 
 .LINK
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoTeamMemebers()
+function Get-AzDoProjects()
 {
     [CmdletBinding(
-        DefaultParameterSetName='Name'
     )]
     param
     (
@@ -46,8 +43,7 @@ function Get-AzDoTeamMemebers()
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ParameterSetName='Name')][Alias("name")]$TeamName,
-        [string][parameter(ParameterSetName='ID')][Alias("id")]$TeamId
+        [string]$ProjectName
     )
     BEGIN
     {
@@ -56,9 +52,7 @@ function Get-AzDoTeamMemebers()
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
         }        
 
-        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.2" }
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.2"}
-
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
@@ -74,8 +68,6 @@ function Get-AzDoTeamMemebers()
             }
         }
 
-        if ([string]::IsNullOrEmpty($TeamName) -and [string]::IsNullOrEmpty($TeamId)) { throw "Specify a Tean Name or Team ID" }
-
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "`tParameter Values"
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "`t`t$_ = '$($PSBoundParameters[$_])'" }        
@@ -84,23 +76,44 @@ function Get-AzDoTeamMemebers()
     {
         $apiParams = @()
 
-        # https://dev.azure.com/{organization}/_apis/projects/{projectId}/teams/{teamId}/members?api-version=5.0
-        if (-Not [string]::IsNullOrEmpty($TeamName))
+        if ($Mine) 
         {
-            $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams/$($TeamName)/members" -QueryStringParams $apiParams
-        } 
-        elseif ([string]::IsNullOrEmpty($TeamId))
-        {
-            $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams/$($TeamId)/members" -QueryStringParams $apiParams
+            $apiParams += "Mine=true"
         }
 
-        $teams = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
-        
-        Write-Verbose "---------TEAM MEMBERS---------"
-        Write-Verbose $teams
-        Write-Verbose "---------TEAM MEMBERS---------"
+        # GET https://dev.azure.com/{organization}/_apis/projects?api-version=5.0
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects" -QueryStringParams $apiParams
 
-        return $teams.value.identity
+        $projects = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
+        
+        Write-Verbose "---------PROJECTS---------"
+        Write-Verbose $projects
+        Write-Verbose "---------PROJECTS---------"
+
+        if ($projects.count -ne $null)
+        {   
+            if (-Not [string]::IsNullOrEmpty($ProjectName))
+            {
+                foreach($bd in $projects.value)
+                {
+                    if ($bd.name -like $ProjectName) {
+                        $projectDetails = Get-AzDoProjectDetails -AzDoConnection $AzDoConnection -ProjectId $bd.id
+
+                        return $projectDetails
+                    }                     
+                }
+            }
+            else {
+                return $projects.value
+            }
+        }
+        elseif ($projects -ne $null) {
+            return $projects
+        }
+
+        Write-Verbose "Project $ProjectName not found."
+        
+        return $null
     }
     END { }
 }

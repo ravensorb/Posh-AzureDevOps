@@ -1,10 +1,10 @@
 <#
 
 .SYNOPSIS
-This commend provides retrieve Teams from Azure DevOps
+This commend provides retrieve Users from Azure DevOps
 
 .DESCRIPTION
-The command will retrieve Azure DevOps teams (if they exists) 
+The command will retrieve Azure DevOps users (if they exists) 
 
 .PARAMETER AzDoConnect
 A valid AzDoConnection object
@@ -22,7 +22,16 @@ Allows for specifying a specific version of the api to use (default is 5.0)
 The name of the build definition to retrieve (use on this OR the id parameter)
 
 .EXAMPLE
-Get-AzDoTeams -ProjectUrl https://dev.azure.com/<organizztion>/<project>
+Get-AzDoUsers
+
+.EXAMPLE
+Get-AzDoUsers -UserEmail <user email address>
+
+.EXAMPLE
+Get-AzDoUsers -UserName <user name>
+
+.EXAMPLE
+Get-AzDoUsers -UserId <user id>
 
 .NOTES
 
@@ -30,9 +39,10 @@ Get-AzDoTeams -ProjectUrl https://dev.azure.com/<organizztion>/<project>
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoTeams()
+function Get-AzDoUsers()
 {
     [CmdletBinding(
+        DefaultParameterSetName="Id"
     )]
     param
     (
@@ -43,8 +53,9 @@ function Get-AzDoTeams()
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter()]$TeamName,
-        [switch][parameter()]$Mine
+        [string][parameter(ParameterSetName="Name")][Alias("name")]$UserName,
+        [string][parameter(ParameterSetName="Email")][Alias("email")]$UserEmail,
+        [Guid][parameter(ParameterSetName="Id")][Alias("id")]$UserId = [Guid]::Empty
     )
     BEGIN
     {
@@ -53,9 +64,8 @@ function Get-AzDoTeams()
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
         }        
 
-        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.2" }
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.2"}
-
+        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1"}
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
@@ -79,53 +89,41 @@ function Get-AzDoTeams()
     {
         $apiParams = @()
 
-        if ($Mine) 
-        {
-            $apiParams += "Mine=true"
-        }
+        # https://vssps.dev.azure.com/{organization}/_apis/graph/users?api-version=5.0-preview.1
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.VsspUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/graph/users" -QueryStringParams $apiParams
 
-        # https://dev.azure.com/{organization}/_apis/projects/{projectId}/teams?api-version=5.0
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams" -QueryStringParams $apiParams
-
-        $teams = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
+        $users = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
-        Write-Verbose "---------TEAMS---------"
-        Write-Verbose $teams
-        Write-Verbose "---------TEAMS---------"
+        Write-Verbose "---------USERS---------"
+        Write-Verbose $users
+        Write-Verbose "---------USERS---------"
 
-        if ($teams.count -ne $null)
+        if ($users.count -ne $null)
         {   
-            if (-Not [string]::IsNullOrEmpty($TeamName))
+            Write-Verbose "User Count: $($users.count)"
+
+            if (-Not [string]::IsNullOrEmpty($UserName) -or $UserId -ne [Guid]::Empty -or -Not [string]::IsNullOrEmpty($UserEmail))
             {
-                foreach($bd in $teams.value)
+                foreach($item in $users.value)
                 {
-                    if ($bd.name -like $TeamName){
-                        Write-Verbose "Team Found $($bd.name) found."
+                    Write-Verbose "User: $($item.cuid) - $($item.displayName) - $($item.mailAddress)"
 
-                        # https://dev.azure.com/{organization}/_apis/projects/{projectId}/teams/{teamId}?api-version=5.0
-                        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams/$($bd.id)" 
-                        $teamDetails = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
+                    if ($item.displayName -like $UserName -or $item.origanId -eq $UserId -or ($item.mailAddress -eq $UserEmail -and -Not [string]::IsNullOrEmpty($UserEmail))) {
+                        Write-Verbose "User Found $($item.displayName) found."
 
-                        return $teamDetails
+                        return $item
                     }                     
                 }
             }
             else {
-                return $teams.value
+                return $users.value
             }
-
-            Write-Verbose "Team $TeamName not found."
-
-            return $null
         } 
-        elseif ($teams -ne $null) {
-            return $teams
-        }
 
-        Write-Verbose "Team $TeamName not found."
-        
+        Write-Verbose "No Users found."
+
         return $null
-    }
+}
     END { }
 }
 

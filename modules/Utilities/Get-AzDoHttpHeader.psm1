@@ -23,7 +23,7 @@ function Get-AzDoHttpHeader()
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -or $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
@@ -56,7 +56,7 @@ function Get-AzDoHttpHeader()
             $headers.Add("Authorization", ("Bearer {0}" -f $OAuthToken))
         }
 
-        $headers.Add("Accept", "application/json;api-version=$($Apiversion)")
+        #$headers.Add("Accept", "application/json;api-version=$($Apiversion)")
     
         #Write-Verbose $headers
 

@@ -50,7 +50,7 @@ function Get-AzDoRepoBranches()
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -or $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
@@ -70,10 +70,13 @@ function Get-AzDoRepoBranches()
     }
     PROCESS
     {
-         
+        $apiParams = @()
+
+        $apiParams += "includeStatuses=True"
+        $apiParams += "latestStatusesOnly=True"
 
         # GET https://dev.azure.com/{organization}/{project}/_apis/git/repositories/{repositoryId}/refs?api-version=5
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/git/repositories/$($Name)/refs" -QueryStringParams "includeStatuses=True&latestStatusesOnly=True"
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/git/repositories/$($Name)/refs" -QueryStringParams $apiParams
 
         $branches = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders 
         

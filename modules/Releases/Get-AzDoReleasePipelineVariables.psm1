@@ -98,7 +98,9 @@ function Get-AzDoReleasePipelineVariables()
 
         if ($definition -eq $null) { throw "Could not find a valid release definition.  Check your parameters and try again"}
 
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ReleaseManagementUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions/$($definition.Id)" -QueryStringParams "expand=Environments,variablegroups"
+        $apiParams += "expand=Environments,variablegroups"
+        
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ReleaseManagementUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/release/definitions/$($definition.Id)" -QueryStringParams $apiParams
         
         $definition = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 

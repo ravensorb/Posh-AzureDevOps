@@ -47,8 +47,8 @@ function Get-AzDoBuildDefinition()
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ParameterSetName='Name', ValueFromPipelinebyPropertyName = $true)]$BuildDefinitionName,
-        [int][parameter(ParameterSetName='ID', ValueFromPipelinebyPropertyName = $true)]$BuildDefinitionId,
+        [string][parameter(ParameterSetName='Name', ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)][Alias("name")]$BuildDefinitionName,
+        [int][parameter(ParameterSetName='ID', ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)][Alias("id")]$BuildDefinitionId,
         [string]$ExpandFields
     )
     BEGIN
@@ -60,7 +60,7 @@ function Get-AzDoBuildDefinition()
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -or $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
@@ -110,17 +110,24 @@ function Get-AzDoBuildDefinition()
 
         if ($buildDefinitions.count -ne $null)
         {   
-            foreach($bd in $buildDefinitions.value)
+            if (-Not [string]::IsNullOrEmpty($BuildDefinitionName))
             {
-                if ($bd.name -like $BuildDefinitionName){
-                    Write-Verbose "Release Defintion Found $($bd.name) found."
+                foreach($bd in $buildDefinitions.value)
+                {
+                    if ($bd.name -like $BuildDefinitionName){
+                        Write-Verbose "Release Defintion Found $($bd.name) found."
 
-                    $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/build/definitions/$($bd.id)" -QueryStringParams $apiParams
-                    $buildDefinitions = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
+                        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/build/definitions/$($bd.id)" -QueryStringParams $apiParams
+                        $buildDefinitions = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 
-                    return $buildDefinitions
+                        return $buildDefinitions
+                    }                     
                 }
             }
+            else {
+                return $buildDefinitions.value
+            }
+
             Write-Verbose "Build definition $BuildDefinitionName not found."
 
             return $null

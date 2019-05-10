@@ -51,10 +51,10 @@ function Get-AzDoLibraryVariableGroup()
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
         }        
     
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1" }
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1"}
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -or $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
@@ -82,12 +82,19 @@ function Get-AzDoLibraryVariableGroup()
         
         Write-Verbose $variableGroups
 
-        foreach($variableGroup in $variableGroups.value){
-            if (($variableGroup.name -like $VariableGroupName) -or ($variableGroup.id -eq $VariableGroupId)) {
-                Write-Verbose "Variable group $($variableGroup.name) found."
-                
-                $variableGroup
-            }   
+        if (-Not [string]::IsNullOrEmpty($VariableGroupName) -or $VariableGroupId -ne 0)
+        {
+            foreach($variableGroup in $variableGroups.value){
+                if (($variableGroup.name -like $VariableGroupName) -or ($variableGroup.id -eq $VariableGroupId)) {
+                    Write-Verbose "Variable group $($variableGroup.name) found."
+                    
+                    $variableGroup
+                }   
+            }
+        }
+        else 
+        {
+            $variableGroups.value    
         }
     }
     END 

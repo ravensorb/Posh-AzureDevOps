@@ -59,7 +59,7 @@ function Get-AzDoBuildPipelineVariables()
     
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -or $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
@@ -97,7 +97,11 @@ function Get-AzDoBuildPipelineVariables()
 
         if ($definition -eq $null) { throw "Could not find a valid build definition.  Check your parameters and try again"; }
 
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/build/definitions/$($definition.Id)" -QueryStringParams "Expand=parameters"
+        $apiParams = @()
+
+        $apiParams += "Expand=parameters"
+
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/build/definitions/$($definition.Id)" -QueryStringParams $apiParams
 
         $definition = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 

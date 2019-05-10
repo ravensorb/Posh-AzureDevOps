@@ -84,8 +84,6 @@ function Get-AzDoReleaseDefinition()
     {
         $apiParams = @()
 
-        $apiParams += 
-
         if (-Not [string]::IsNullOrEmpty($ExpandFields)) 
         {
             $apiParams += "Expand=$($ExpandFields)"

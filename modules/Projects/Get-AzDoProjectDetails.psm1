@@ -1,10 +1,10 @@
 <#
 
 .SYNOPSIS
-This commend provides retrieve members for a specifc Team from Azure DevOps
+This commend provides retrieve Project Details from Azure DevOps
 
 .DESCRIPTION
-The command will retrieve members for the Azure DevOps teams specified 
+The command will retrieve Azure DevOps project details (if they exists) 
 
 .PARAMETER AzDoConnect
 A valid AzDoConnection object
@@ -22,20 +22,21 @@ Allows for specifying a specific version of the api to use (default is 5.0)
 The name of the build definition to retrieve (use on this OR the id parameter)
 
 .EXAMPLE
-Get-AzDoTeamMemebers -ProjectUrl https://dev.azure.com/<organizztion>/<project> -TeamName <name>
+Get-AzDoProjectDetails -ProjectName <project name>
 
 .EXAMPLE
-Get-AzDoTeamMemebers -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Teamid <id>
+Get-AzDoProjectDetails -ProjectId <project id>
+
 .NOTES
 
 .LINK
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoTeamMemebers()
+function Get-AzDoProjectDetails()
 {
     [CmdletBinding(
-        DefaultParameterSetName='Name'
+        DefaultParameterSetName="ID"
     )]
     param
     (
@@ -46,8 +47,8 @@ function Get-AzDoTeamMemebers()
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ParameterSetName='Name')][Alias("name")]$TeamName,
-        [string][parameter(ParameterSetName='ID')][Alias("id")]$TeamId
+        [string][parameter(ParameterSetName="Name")][Alias("name")]$ProjectName,
+        [Guid][parameter(ParameterSetName="ID", ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("id")]$ProjectId
     )
     BEGIN
     {
@@ -56,9 +57,7 @@ function Get-AzDoTeamMemebers()
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
         }        
 
-        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.2" }
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.2"}
-
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
@@ -74,7 +73,7 @@ function Get-AzDoTeamMemebers()
             }
         }
 
-        if ([string]::IsNullOrEmpty($TeamName) -and [string]::IsNullOrEmpty($TeamId)) { throw "Specify a Tean Name or Team ID" }
+        if ([string]::IsNullOrEmpty($ProjectName) -and $ProjectId -eq $null) { throw "Project Name or ID required" }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "`tParameter Values"
@@ -84,23 +83,20 @@ function Get-AzDoTeamMemebers()
     {
         $apiParams = @()
 
-        # https://dev.azure.com/{organization}/_apis/projects/{projectId}/teams/{teamId}/members?api-version=5.0
-        if (-Not [string]::IsNullOrEmpty($TeamName))
+        # https://dev.azure.com/{organization}/_apis/projects/{projectId}?api-version=5.0
+        if (-Not [string]::IsNullOrEmpty($ProjectName))
         {
-            $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams/$($TeamName)/members" -QueryStringParams $apiParams
-        } 
-        elseif ([string]::IsNullOrEmpty($TeamId))
-        {
-            $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams/$($TeamId)/members" -QueryStringParams $apiParams
+            $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($ProjectName)" 
+        } else {
+            $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($ProjectId)" 
         }
+        $projectDetails = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 
-        $teams = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
-        
-        Write-Verbose "---------TEAM MEMBERS---------"
-        Write-Verbose $teams
-        Write-Verbose "---------TEAM MEMBERS---------"
+        Write-Verbose "---------PROJECTS DETAILS---------"
+        Write-Verbose $projectDetails
+        Write-Verbose "---------PROJECTS DETAILS---------"
 
-        return $teams.value.identity
+        return $projectDetails
     }
     END { }
 }

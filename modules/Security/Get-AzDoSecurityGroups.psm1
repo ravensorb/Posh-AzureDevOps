@@ -1,10 +1,10 @@
 <#
 
 .SYNOPSIS
-This commend provides retrieve Teams from Azure DevOps
+This commend provides retrieve Security Groups from Azure DevOps
 
 .DESCRIPTION
-The command will retrieve Azure DevOps teams (if they exists) 
+The command will retrieve Azure DevOps security groups (if they exists) 
 
 .PARAMETER AzDoConnect
 A valid AzDoConnection object
@@ -22,7 +22,7 @@ Allows for specifying a specific version of the api to use (default is 5.0)
 The name of the build definition to retrieve (use on this OR the id parameter)
 
 .EXAMPLE
-Get-AzDoTeams -ProjectUrl https://dev.azure.com/<organizztion>/<project>
+Get-AzDoSecurityGroups -ProjectUrl https://dev.azure.com/<organizztion>/<project>
 
 .NOTES
 
@@ -30,9 +30,10 @@ Get-AzDoTeams -ProjectUrl https://dev.azure.com/<organizztion>/<project>
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoTeams()
+function Get-AzDoSecurityGroups()
 {
     [CmdletBinding(
+        DefaultParameterSetName="Name"
     )]
     param
     (
@@ -43,8 +44,8 @@ function Get-AzDoTeams()
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter()]$TeamName,
-        [switch][parameter()]$Mine
+        [string][parameter(ParameterSetName="Name")]$GroupName,
+        [Guid][parameter(ParameterSetName="Id")]$GroupId = [Guid]::Empty
     )
     BEGIN
     {
@@ -53,9 +54,8 @@ function Get-AzDoTeams()
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
         }        
 
-        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.2" }
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.2"}
-
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1" }
+        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
@@ -79,50 +79,42 @@ function Get-AzDoTeams()
     {
         $apiParams = @()
 
-        if ($Mine) 
-        {
-            $apiParams += "Mine=true"
-        }
+        $apiParams += "subjectTypes=vssgp"
+        $apiParams += "scopeDescriptor=$($AzDoConnection.ProjectDescriptor)"
 
-        # https://dev.azure.com/{organization}/_apis/projects/{projectId}/teams?api-version=5.0
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams" -QueryStringParams $apiParams
+        # GET https://vssps.dev.azure.com/{organization}/_apis/graph/groups?scopeDescriptor={scopeDescriptor}&subjectTypes={subjectTypes}&continuationToken={continuationToken}&api-version=5.0-preview.1
+        $apiUrl = Get-AzDoApiUrl -RootPath $AzDoConnection.VsspUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/graph/groups" -QueryStringParams $apiParams
 
-        $teams = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
+        $groups = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
-        Write-Verbose "---------TEAMS---------"
-        Write-Verbose $teams
-        Write-Verbose "---------TEAMS---------"
+        Write-Verbose "---------GROUPS---------"
+        Write-Verbose $groups
+        Write-Verbose "---------GROUPS---------"
 
-        if ($teams.count -ne $null)
+        if ($groups.count -ne $null -and $groups.count -gt 0)
         {   
-            if (-Not [string]::IsNullOrEmpty($TeamName))
+            Write-Verbose "Found $($groups.count) groups"
+            if (-Not [string]::IsNullOrEmpty($GroupName) -or $GroupId -ne [Guid]::Empty)
             {
-                foreach($bd in $teams.value)
+                Write-Verbose "Looking for a specific group $GroupId - $GroupName"
+
+                foreach($item in $groups.value)
                 {
-                    if ($bd.name -like $TeamName){
-                        Write-Verbose "Team Found $($bd.name) found."
+                    Write-Verbose "Group: $($item.originId) - $($item.displayName)"
 
-                        # https://dev.azure.com/{organization}/_apis/projects/{projectId}/teams/{teamId}?api-version=5.0
-                        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams/$($bd.id)" 
-                        $teamDetails = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
+                    if ($item.displayName -like "*$($GroupName)*" -or $item.originId -eq $GroupId) {
+                        Write-Verbose "Group Found '$($item.displayName)' found."
 
-                        return $teamDetails
+                        return $item;
                     }                     
                 }
             }
             else {
-                return $teams.value
+                return $groups.value
             }
-
-            Write-Verbose "Team $TeamName not found."
-
-            return $null
         } 
-        elseif ($teams -ne $null) {
-            return $teams
-        }
 
-        Write-Verbose "Team $TeamName not found."
+        Write-Verbose "No groups found."
         
         return $null
     }
