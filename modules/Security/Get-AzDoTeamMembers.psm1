@@ -35,7 +35,7 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function Get-AzDoTeamMemebers()
 {
     [CmdletBinding(
-        DefaultParameterSetName='Name'
+        DefaultParameterSetName='ID'
     )]
     param
     (
@@ -46,8 +46,8 @@ function Get-AzDoTeamMemebers()
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ParameterSetName='Name')][Alias("name")]$TeamName,
-        [string][parameter(ParameterSetName='ID')][Alias("id")]$TeamId
+        [string][parameter(ParameterSetName='Name', ValueFromPipelineByPropertyName=$true)]$TeamName,
+        [Guid][parameter(ParameterSetName='ID', ValueFromPipelineByPropertyName=$true)][Alias("id")]$TeamId
     )
     BEGIN
     {
@@ -60,13 +60,13 @@ function Get-AzDoTeamMemebers()
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.2"}
 
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
                 $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+                if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
             }
             else 
             {

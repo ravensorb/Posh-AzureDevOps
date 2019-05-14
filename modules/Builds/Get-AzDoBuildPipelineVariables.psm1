@@ -59,13 +59,13 @@ function Get-AzDoBuildPipelineVariables()
     
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
                 $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+                if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
             }
             else 
             {
@@ -95,7 +95,7 @@ function Get-AzDoBuildPipelineVariables()
             $definition = Get-AzDoBuildDefinition -AzDoConnection $AzDoConnection -BuildDefinitionName $BuildDefinitionName 
         }
 
-        if ($definition -eq $null) { throw "Could not find a valid build definition.  Check your parameters and try again"; }
+        if ($null -eq $definition) { throw "Could not find a valid build definition.  Check your parameters and try again"; }
 
         $apiParams = @()
 
@@ -121,7 +121,7 @@ function Get-AzDoBuildPipelineVariables()
         $variables = @()
 
         Write-Verbose "Build Variables"
-        $definition.variables.PSObject.Properties | ? { $_.MemberType -eq "NoteProperty"} | % { 
+        $definition.variables.PSObject.Properties | Where-Object { $_.MemberType -eq "NoteProperty"} | ForEach-Object { 
             Write-Verbose "`t$($_.Name) => $($_.Value)"
 
             $variables += [pscustomobject]@{

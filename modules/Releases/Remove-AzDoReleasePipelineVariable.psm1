@@ -65,13 +65,13 @@ function Remove-AzDoReleasePipelineVariable()
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -or $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -or $null -eq $AzDoConnection)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
                 $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+                if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
             }
             else 
             {
@@ -96,7 +96,7 @@ function Remove-AzDoReleasePipelineVariable()
             $definition = Get-AzDoReleaseDefinition -AzDoConnection $AzDoConnection -ReleaseDefinitionName $ReleaseDefinitionName -ExpandFields "variables"
         }
 
-        if ($definition -eq $null) { throw "Could not find a valid release definition.  Check your parameters and try again";}
+        if ($null -eq $definition) { throw "Could not find a valid release definition.  Check your parameters and try again";}
 
         [bool]$found = $false
         foreach($prop in $definition.variables.PSObject.Properties.Where{$_.MemberType -eq "NoteProperty" -and (($_.Name -eq $VariableName) -or $All)})

@@ -43,7 +43,6 @@ function Get-AzDoTeams()
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter()]$TeamName,
         [switch][parameter()]$Mine
     )
     BEGIN
@@ -57,13 +56,13 @@ function Get-AzDoTeams()
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.2"}
 
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
                 $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+                if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
             }
             else 
             {
@@ -87,45 +86,38 @@ function Get-AzDoTeams()
         # https://dev.azure.com/{organization}/_apis/projects/{projectId}/teams?api-version=5.0
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams" -QueryStringParams $apiParams
 
-        $teams = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
+        $teamsResult = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------TEAMS---------"
-        Write-Verbose $teams
+        Write-Verbose $teamsResult
         Write-Verbose "---------TEAMS---------"
 
-        if ($teams.count -ne $null)
-        {   
-            if (-Not [string]::IsNullOrEmpty($TeamName))
-            {
-                foreach($bd in $teams.value)
-                {
-                    if ($bd.name -like $TeamName){
-                        Write-Verbose "Team Found $($bd.name) found."
+        $teamsResult.value | ForEach-Object { 
+            #id          : [Guid]
+            #name        : [string]
+            #url         : [string]
+            #description : [string]
+            #identityUrl : [string]
+            #projectName : [string]
+            #projectId   : [Guid]
+           
+            Write-Verbose "`t$($_.id) => $($_.name)"
 
-                        # https://dev.azure.com/{organization}/_apis/projects/{projectId}/teams/{teamId}?api-version=5.0
-                        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams/$($bd.id)" 
-                        $teamDetails = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
-
-                        return $teamDetails
-                    }                     
-                }
+            # Convert to a strongly typed object
+            $team = [pscustomobject]@{
+                id = [Guid]$_.id;
+                name = [string]$_.name;
+                url = [string]$_.url;
+                description = [string]$_.description;
+                identityUrl = [string]$_.identityUrl;
+                projectName = [string]$_.projectName;
+                projectId = [Guid]$_.projectId;
             }
-            else {
-                return $teams.value
-            }
 
-            Write-Verbose "Team $TeamName not found."
-
-            return $null
-        } 
-        elseif ($teams -ne $null) {
-            return $teams
-        }
-
-        Write-Verbose "Team $TeamName not found."
-        
-        return $null
+            $team
+        }        
     }
-    END { }
+    END { 
+    }
 }
 
