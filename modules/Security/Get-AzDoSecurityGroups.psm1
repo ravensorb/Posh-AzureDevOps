@@ -41,11 +41,9 @@ function Get-AzDoSecurityGroups()
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
         [string][parameter(ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
         [string][parameter(ValueFromPipelinebyPropertyName = $true)]$PAT,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [string]$ApiVersion = $global:AzDoApiVersion
 
         # Module Parameters
-        [string][parameter(ParameterSetName="Name")]$GroupName,
-        [Guid][parameter(ParameterSetName="Id")]$GroupId = [Guid]::Empty
     )
     BEGIN
     {
@@ -93,30 +91,27 @@ function Get-AzDoSecurityGroups()
 
         if ($null -ne $groups.count -and $groups.count -gt 0)
         {   
-            Write-Verbose "Found $($groups.count) groups"
-            if (-Not [string]::IsNullOrEmpty($GroupName) -or $GroupId -ne [Guid]::Empty)
+            #TODO Need to find a better way to do this!
+            # This is a HACK to filter out all Teams from the list of groups.
+            $teams = Get-AzDoTeams -AzDoConnection $AzDoConnection
+
+            foreach($item in $groups.value)
             {
-                Write-Verbose "Looking for a specific group $GroupId - $GroupName"
-
-                foreach($item in $groups.value)
+                [bool]$found = $false
+                foreach ($team in $teams)
                 {
-                    Write-Verbose "Group: $($item.originId) - $($item.displayName)"
-
-                    if ($item.displayName -like "*$($GroupName)*" -or $item.originId -eq $GroupId) {
-                        Write-Verbose "Group Found '$($item.displayName)' found."
-
-                        return $item;
-                    }                     
+                    if ($item.displayName -eq $team.name) { $found = $true }
                 }
-            }
-            else {
-                return $groups.value
+
+                if (-Not $found) { $item }
             }
         } 
-
-        Write-Verbose "No groups found."
-        
-        return $null
+        else 
+        {
+            Write-Verbose "No groups found."
+            
+            return $null
+        }
     }
     END { }
 }
