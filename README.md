@@ -4,6 +4,12 @@ Powershell Module for working with Azure DevOps
 ## Getting Started
 Download the files into a specific folder and then run the script ".\Import-AzDoModules.ps1".  This will import all of the modules correctly so they can be executed like any standard powershell command.  After this, use the Connect-AzDo module to create a connection to your Azure DevOps instance.  This will create a connection and setup the environment so all other calls can be made without needed to pass connection details in explicity.
 
+```
+./Conntet-AzDo -OrganizationUrl <Org URL> -ProjectName <project name> -PAT <PAT token with full access>
+
+./
+```
+
 ## Overview
 This module provides a way to work with most of Azure DevOps from PowerShell.  It is broken out by functional areas (Builds, Libraries, Projects, Releases, Repos, Security, and Work Items).
 

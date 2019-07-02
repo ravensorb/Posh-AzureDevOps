@@ -23,7 +23,7 @@ function Get-AzDoHttpHeader()
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
@@ -35,7 +35,7 @@ function Get-AzDoHttpHeader()
         Write-Verbose "`tParameter Values"
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "`t`t$_ = '$($PSBoundParameters[$_])'" }
 
-        if ($AzDoConnection -ne $null)
+        if ($null -ne $AzDoConnection)
         {
             $ProjectUrl = $AzDoConnection.ProjectUrl
             $PAT = $AzDoConnection.PAT
@@ -57,6 +57,7 @@ function Get-AzDoHttpHeader()
         }
 
         #$headers.Add("Accept", "application/json;api-version=$($Apiversion)")
+        $headers.Add("Accept", "application/json")
     
         #Write-Verbose $headers
 

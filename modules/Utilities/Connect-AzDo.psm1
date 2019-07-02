@@ -65,7 +65,7 @@ function Connect-AzDo()
 
         try {
             $projectDetails = Get-AzDoProjectDetails -AzDoConnection $azdoConnection -ProjectName $azdoConnection.ProjectName
-            if ($projectDetails -ne $null) {
+            if ($null -ne $projectDetails) {
                 $azdoConnection.ProjectId = $projectDetails.id
             }
         }

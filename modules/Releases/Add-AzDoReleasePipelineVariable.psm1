@@ -83,13 +83,13 @@ function Add-AzDoReleasePipelineVariable()
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -or $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -or $null -eq $AzDoConnection)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
                 $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+                if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
             }
             else 
             {
@@ -97,7 +97,7 @@ function Add-AzDoReleasePipelineVariable()
             }
         }
 
-        if ([string]::IsNullOrEmpty($VariableName) -and ($VariableGroups -eq $null -or $VariableGroups.Count -eq 0))
+        if ([string]::IsNullOrEmpty($VariableName) -and ($null -eq $VariableGroups -or $VariableGroups.Count -eq 0))
         {
             throw "Please specifiy a variable name or at least one variable group"
         }

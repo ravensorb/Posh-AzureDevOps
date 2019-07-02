@@ -55,13 +55,13 @@ function New-AzDoLibraryVariableGroup()
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1" }
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
                 $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+                if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
             }
             else 
             {
