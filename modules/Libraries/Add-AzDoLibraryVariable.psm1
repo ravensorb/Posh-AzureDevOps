@@ -6,9 +6,6 @@ Add/Replace a new variable to a specific Azure DevOps libary
 .DESCRIPTION
 The command will add/replace a variable to the specificed library
 
-.PARAMETER ProjectUrl
-The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
-
 .PARAMETER VariableGroupName
 The name of the variable group to create/update
 
@@ -30,14 +27,11 @@ Indicates if the ENTIRE library should be reset. This means that ALL values are 
 .PARAMETER Force
 Indicates if the library group should be created if it doesn't exist
 
-.PARAMETER PAT
-A valid personal access token with at least read access for build definitions
-
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Add-AzDoLibraryVariable -ProjectUrl https://dev.azure.com/<organizztion>/<project> -VariableGroupName <variable group name> -VariableName <variable name> -VariableValue <some value> -PAT <personal access token>
+Add-AzDoLibraryVariable -VariableGroupName <variable group name> -VariableName <variable name> -VariableValue <some value>
 
 .NOTES
 
@@ -52,12 +46,11 @@ function Add-AzDoLibraryVariable()
     (
         # Common Parameters
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$VariableGroupName,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true, ParameterSetName="name")]$VariableGroupName,
+        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true, ParameterSetName="id")]$VariableGroupId,
         [string]$VariableGroupDescription,
         [string][parameter(Mandatory = $true,  ValueFromPipelineByPropertyName = $true)]$VariableName,
         [string][parameter(Mandatory = $true,  ValueFromPipelineByPropertyName = $true)]$VariableValue,
@@ -77,29 +70,26 @@ function Add-AzDoLibraryVariable()
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
-            if ([string]::IsNullOrEmpty($ProjectUrl))
-            {
-                $AzDoConnection = Get-AzDoActiveConnection
+            $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
-            }
-            else 
-            {
-                $AzDoConnection = Connect-AzDo -ProjectUrl $ProjectUrl -PAT $PAT -LocalOnly
-            }
+            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
 
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
-
-        
     }
     PROCESS
     {
-        $method = "Post"
-        $variableGroup = Get-AzDoLibraryVariableGroup -AzDoConnection $AzDoConnection -ApiVersion $ApiVersion -VariableGroupName $VariableGroupName
+        $method = "POST"
+
+        if ([string]::IsNullOrEmpty($VariableGroupName) -and [string]::IsNullOrEmpty($VariableGroupId))
+        {
+            throw "Specify either Variable Group Name or Variable Group Id"
+        }
+
+        $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -eq $VariableGroupName -or $_.id -eq $VariableGroupId }
 
         if($variableGroup)
         {

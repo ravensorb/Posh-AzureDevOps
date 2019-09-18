@@ -7,13 +7,19 @@ Connect to Azure DevOps
 This command will create a connection to Azure DevOps
 
 .PARAMETER ProjectUrl
-The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
+The full project url to connect to. Ex: https://dev.azure.com/<org>/<project>
+
+.PARAMETER OrganziationUrl
+The organziation url to connect to, Ex: https://dev.auzre.com/<org>
+
+.PARAMETER ProjectName
+Then name of the project to connect to
 
 .PARAMETER PAT
-A valid personal access token with at least read access for build definitions
+The Personal Access Toen (PAT) to use for authentication
 
 .EXAMPLE
-Connect-AzDo -ProjectUrl https://dev.azure.com/<organizztion>/<project> -PAT <PAT Token>
+Connect-AzDo -OrganizationUrl https://dev.azure.com/someorg -ProjectName SomeProject -PAT <PAT Token>
 
 .NOTES
 

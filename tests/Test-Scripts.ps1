@@ -85,7 +85,7 @@ PROCESS
     if ($libraryVariableGroupRestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     Write-Host "`tGet Library Variable Group: " -NoNewline
-    $libraryVariableGroupRestResult = Get-AzDoLibraryVariableGroup -AzDoConnection $AzDoConnection  -ApiVersion $ApiVersion -VariableGroupName $LibraryVariableGroupName
+    $libraryVariableGroupRestResult = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection  -ApiVersion $ApiVersion -VariableGroupName $LibraryVariableGroupName
     if ($libraryVariableGroupRestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     Write-Host "`tRemove Library Variable: " -NoNewline

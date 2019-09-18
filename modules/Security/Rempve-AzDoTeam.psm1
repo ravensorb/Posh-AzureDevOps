@@ -1,7 +1,7 @@
 <#
 
 .SYNOPSIS
-This commend provides remove a Team for Azure DevOps
+This command provides remove a Team for Azure DevOps
 
 .DESCRIPTION
 The command will remove an Azure DevOps Team
@@ -9,17 +9,14 @@ The command will remove an Azure DevOps Team
 .PARAMETER AzDoConnect
 A valid AzDoConnection object
 
-.PARAMETER ProjectUrl
-The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
-
-.PARAMETER PAT
-A valid personal access token with at least read access for build definitions
-
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
+.PARAMETER TeamId
+The id of the group to remove
+
 .PARAMETER TeamName
-The name of the group to create
+The name of the group to remove
 
 .EXAMPLE
 Remove-AzDoTeam -TeamName <team name>
@@ -39,8 +36,6 @@ function Remove-AzDoTeam()
     (
         # Common Parameters
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
@@ -58,16 +53,9 @@ function Remove-AzDoTeam()
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
-            if ([string]::IsNullOrEmpty($ProjectUrl))
-            {
-                $AzDoConnection = Get-AzDoActiveConnection
+            $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
-            }
-            else 
-            {
-                $AzDoConnection = Connect-AzDo -ProjectUrl $ProjectUrl -PAT $PAT -LocalOnly
-            }
+            if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"

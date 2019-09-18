@@ -6,23 +6,17 @@ Create a new Library Variable Group
 .DESCRIPTION
 The command will create a new library variable group
 
-.PARAMETER ProjectUrl
-The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
-
 .PARAMETER VariableGroupName
 The name of the variable group to retrieve
 
 .PARAMETER Description
 A description for this library group
 
-.PARAMETER PAT
-A valid personal access token with at least read access for build definitions
-
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-New-AzDoLibraryVariableGroup -ProjectUrl https://dev.azure.com/<organizztion>/<project> -VariableGroupName <variable group name> -PAT <personal access token>
+New-AzDoLibraryVariableGroup -VariableGroupName <variable group name>
 
 .NOTES
 
@@ -37,8 +31,6 @@ function New-AzDoLibraryVariableGroup()
     (
         # Common Parameters
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
@@ -57,29 +49,21 @@ function New-AzDoLibraryVariableGroup()
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
-            if ([string]::IsNullOrEmpty($ProjectUrl))
-            {
-                $AzDoConnection = Get-AzDoActiveConnection
+            $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
-            }
-            else 
-            {
-                $AzDoConnection = Connect-AzDo -ProjectUrl $ProjectUrl -PAT $PAT -LocalOnly
-            }
+            if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
 
-        
     }
     PROCESS
     {
         $method = "Post"
 
-        $variableGroup = Get-AzDoLibraryVariableGroup -AzDoConnection $AzDoConnection -VariableGroupName $VariableGroupName
+        $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection ? { $_.name -eq $VariableGroupName }
 
         if ($variableGroup) 
         {

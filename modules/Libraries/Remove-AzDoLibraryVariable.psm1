@@ -6,9 +6,6 @@ Remove a variable from a specific Azure DevOps libary
 .DESCRIPTION
 The  command will removea variable to the specificed library
 
-.PARAMETER ProjectUrl
-The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
-
 .PARAMETER VariableGroupName
 The name of the variable group to create/update
 
@@ -18,14 +15,11 @@ Tha name of the variable to create/update
 .PARAMETER All
 Remove all variables in the library (VariableName is ignored when this is set)
 
-.PARAMETER PAT
-A valid personal access token with at least read access for build definitions
-
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Remove-AzDoLibraryVariable -ProjectUrl https://dev.azure.com/<organizztion>/<project> -VaraibleGroupName <name of variable group> -VariableName <variable name> -PAT <personal access token>
+Remove-AzDoLibraryVariable -VaraibleGroupName <name of variable group> -VariableName <variable name>
 
 .NOTES
 
@@ -40,12 +34,11 @@ function Remove-AzDoLibraryVariable()
     (
         # Common Parameters
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]$VariableGroupName,
+        [string][parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName="name")]$VariableGroupName,
+        [int][parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName="id")]$VariableGroupId,
         [string][parameter(ValueFromPipelineByPropertyName = $true)]$VariableName,
         [switch]$All
     )
@@ -61,16 +54,9 @@ function Remove-AzDoLibraryVariable()
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
-            if ([string]::IsNullOrEmpty($ProjectUrl))
-            {
-                $AzDoConnection = Get-AzDoActiveConnection
+            $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
-            }
-            else 
-            {
-                $AzDoConnection = Connect-AzDo -ProjectUrl $ProjectUrl -PAT $PAT -LocalOnly
-            }
+            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -78,11 +64,15 @@ function Remove-AzDoLibraryVariable()
 
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
 
-        
     }
     PROCESS
     {
-        $variableGroup = Get-AzDoLibraryVariableGroup -AzDoConnection $AzDoConnection -ApiVersion $ApiVersion -VariableGroupName $VariableGroupName
+        if ([string]::IsNullOrEmpty($VariableGroupName) -and [string]::IsNullOrEmpty($VariableGroupId))
+        {
+            throw "Specify either Variable Group Name or Variable Group Id"
+        }
+
+        $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -eq $VariableGroupName -or $_.id -eq $VariableGroupId }
 
         if(-Not $variableGroup)
         {

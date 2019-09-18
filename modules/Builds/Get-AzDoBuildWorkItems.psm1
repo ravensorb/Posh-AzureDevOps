@@ -6,20 +6,14 @@ Retrieve the work items related to  the specified build
 .DESCRIPTION
 The command will retrieve the work items associated with the specified build 
 
-.PARAMETER ProjectUrl
-The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
-
 .PARAMETER BuildId
 The id of the build to retrieve (use on this OR the name parameter)
-
-.PARAMETER PAT
-A valid personal access token with at least read access for build definitions
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoBuildWorkItems -ProjectUrl https://dev.azure.com/<organizztion>/<project> -BuildId <build id> -PAT <personal access token>
+Get-AzDoBuildWorkItems -BuildId <build id>
 
 .NOTES
 
@@ -36,8 +30,6 @@ function Get-AzDoBuildWorkItems()
     (
         # Common Parameters
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
@@ -55,16 +47,9 @@ function Get-AzDoBuildWorkItems()
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
-            if ([string]::IsNullOrEmpty($ProjectUrl))
-            {
-                $AzDoConnection = Get-AzDoActiveConnection
+            $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
-            }
-            else 
-            {
-                $AzDoConnection = Connect-AzDo -ProjectUrl $ProjectUrl -PAT $PAT -LocalOnly
-            }
+            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
         }
 
         if ($BuildId -eq $null) { throw "Build ID must be specified"; }

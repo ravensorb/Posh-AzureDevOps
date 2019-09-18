@@ -9,12 +9,6 @@ The command will retrieve all of the variables groups assocaited with a specific
 .PARAMETER AzDoConnection
 A valid Azure DevOps Connection object
 
-.PARAMETER ProjectUrl
-The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
-
-.PARAMETER PAT
-A valid personal access token with at least read access for release definitions
-
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
@@ -42,8 +36,6 @@ function Get-AzDoReleasePipelineVariableGroups()
     (
         # Common Parameters
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
@@ -62,16 +54,9 @@ function Get-AzDoReleasePipelineVariableGroups()
 
         if (-Not (Test-Path varaible:$AzDoConnection) -or $AzDoConnection -eq $null)
         {
-            if ([string]::IsNullOrEmpty($ProjectUrl))
-            {
-                $AzDoConnection = Get-AzDoActiveConnection
+            $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
-            }
-            else 
-            {
-                $AzDoConnection = Connect-AzDo -ProjectUrl $ProjectUrl -PAT $PAT -LocalOnly
-            }
+            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
         }
 
         if ([string]::IsNullOrEmpty($EnvironmentName)) { $EnvironmentName = "*" }

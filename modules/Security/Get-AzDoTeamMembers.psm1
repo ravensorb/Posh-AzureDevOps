@@ -1,19 +1,13 @@
 <#
 
 .SYNOPSIS
-This commend provides retrieve members for a specifc Team from Azure DevOps
+This command provides retrieve members for a specifc Team from Azure DevOps
 
 .DESCRIPTION
 The command will retrieve members for the Azure DevOps teams specified 
 
 .PARAMETER AzDoConnect
 A valid AzDoConnection object
-
-.PARAMETER ProjectUrl
-The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
-
-.PARAMETER PAT
-A valid personal access token with at least read access for build definitions
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
@@ -22,10 +16,10 @@ Allows for specifying a specific version of the api to use (default is 5.0)
 The name of the build definition to retrieve (use on this OR the id parameter)
 
 .EXAMPLE
-Get-AzDoTeamMemebers -ProjectUrl https://dev.azure.com/<organizztion>/<project> -TeamName <name>
+Get-AzDoTeamMemebers -TeamName <name>
 
 .EXAMPLE
-Get-AzDoTeamMemebers -ProjectUrl https://dev.azure.com/<organizztion>/<project> -Teamid <id>
+Get-AzDoTeamMemebers -Teamid <id>
 .NOTES
 
 .LINK
@@ -41,8 +35,6 @@ function Get-AzDoTeamMemebers()
     (
         # Common Parameters
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
@@ -62,16 +54,9 @@ function Get-AzDoTeamMemebers()
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
-            if ([string]::IsNullOrEmpty($ProjectUrl))
-            {
-                $AzDoConnection = Get-AzDoActiveConnection
+            $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
-            }
-            else 
-            {
-                $AzDoConnection = Connect-AzDo -ProjectUrl $ProjectUrl -PAT $PAT -LocalOnly
-            }
+            if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
         }
 
         if ([string]::IsNullOrEmpty($TeamName) -and [string]::IsNullOrEmpty($TeamId)) { throw "Specify a Tean Name or Team ID" }

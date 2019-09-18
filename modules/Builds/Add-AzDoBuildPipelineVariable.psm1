@@ -6,9 +6,6 @@ Add a new variable/value to the specified Azure DevOps build pipeline
 .DESCRIPTION
 The command will add a variable to the specified Azure DevOps build pipeline
 
-.PARAMETER ProjectUrl
-The full url for the Azure DevOps Project.  For example https://<organization>.visualstudio.com/<project> or https://dev.azure.com/<organization>/<project>
-
 .PARAMETER BuildDefinitionId
 The id of the build definition to update (use on this OR the name parameter)
 
@@ -33,14 +30,11 @@ Indicates if the ENTIRE library should be reset. This means that ALL values are 
 .PARAMETER Force
 Indicates if the library group should be created if it doesn't exist
 
-.PARAMETER PAT
-A valid personal access token with at least read access for build definitions
-
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Add-AzDoBuildPipelineVariable -ProjectUrl https://dev.azure.com/<organizztion>/<project> -BuildDefinitionName <build defintiion name> -VariableName <variable name> -VariableValue <varaible value> -Environment <env name> -PAT <personal access token>
+Add-AzDoBuildPipelineVariable -BuildDefinitionName <build defintiion name> -VariableName <variable name> -VariableValue <varaible value> -Environment <env name>
 
 .NOTES
 
@@ -58,8 +52,6 @@ function Add-AzDoBuildPipelineVariable()
     (
         # Common Parameters
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
@@ -83,22 +75,14 @@ function Add-AzDoBuildPipelineVariable()
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
-            if ([string]::IsNullOrEmpty($ProjectUrl))
-            {
-                $AzDoConnection = Get-AzDoActiveConnection
+            $AzDoConnection = Get-AzDoActiveConnection
 
-                if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
-            }
-            else 
-            {
-                $AzDoConnection = Connect-AzDo -ProjectUrl $ProjectUrl -PAT $PAT -LocalOnly
-            }
+            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "`tParameter Values"
-        $PSBoundParameters.Keys | ForEach-Object { if ($Secret -and $_ -eq "VariableValue") { Write-Verbose "`t`tVariableValue = *******" } else { Write-Verbose "`t`t$_ = '$($PSBoundParameters[$_])'" }}
-    
+        $PSBoundParameters.Keys | ForEach-Object { if ($Secret -and $_ -eq "VariableValue") { Write-Verbose "`t`tVariableValue = *******" } else { Write-Verbose "`t`t$_ = '$($PSBoundParameters[$_])'" }}    
          
     }
     PROCESS

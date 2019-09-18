@@ -26,11 +26,16 @@ This module provides a way to work with most of Azure DevOps from PowerShell.  I
 
 ### Libraries
 * Add-AzDoLibraryVariable
-* Get-AzDoLibraryVariableGroup
+* Add-AzDoVariableGroupResourceAssignment
+* Get-AzDoVariableGroupResourceAssignment
+* Get-AzDoVariableGroupRoleDefinitions
+* Get-AzDoVariableGroups
 * Import-AzDoLibraryVariables
 * New-AzDoLibraryVariableGroup
 * Remove-AzDoLibraryVariable
 * Remove-AzDoLibraryVariableGroup
+* Remove-AzDoVariableGroupResourceAssignment
+* Set-AzDoVariableGroupPermissionInheritance
 
 ### Projects
 Get-AzDoProjectDetails

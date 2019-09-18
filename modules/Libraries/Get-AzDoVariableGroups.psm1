@@ -1,19 +1,19 @@
 <#
 
 .SYNOPSIS
-Retrive branch information from the specified git repository
+Get all variables in a specific Azure DevOps libary
 
 .DESCRIPTION
-The command will retrieve a list of all branches from the specified git repository
+The  command will retreive all variables to the specificed library
 
-.PARAMETER Name
-The name of the git repository
+.PARAMETER VariableGroupName
+The name of the variable group to retrieve
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoRepoBranches -VariableGroupName <git repo name>
+Get-AzDoVariableGroups
 
 .NOTES
 
@@ -21,17 +21,18 @@ Get-AzDoRepoBranches -VariableGroupName <git repo name>
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoRepoBranches()
+function Get-AzDoVariableGroups()
 {
-    [CmdletBinding()]
+    [CmdletBinding(
+        DefaultParameterSetName="Name"
+    )]
     param
     (
         # Common Parameters
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [string]$ApiVersion = $global:AzDoApiVersion
 
         # Module Parameters
-        [string]$Name
     )
     BEGIN
     {
@@ -39,8 +40,9 @@ function Get-AzDoRepoBranches()
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
         }        
-
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
+    
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1" }
+        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
@@ -52,23 +54,22 @@ function Get-AzDoRepoBranches()
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
         $PSBoundParameters.Keys | ForEach-Object { Write-Verbose "$_ = '$($PSBoundParameters[$_])'" }
+
     }
     PROCESS
     {
-        $apiParams = @()
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups"
 
-        $apiParams += "includeStatuses=True"
-        $apiParams += "latestStatusesOnly=True"
-
-        # GET https://dev.azure.com/{organization}/{project}/_apis/git/repositories/{repositoryId}/refs?api-version=5
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/git/repositories/$($Name)/refs" -QueryStringParams $apiParams
-
-        $branches = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders 
+        $variableGroups = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
-        Write-Verbose $branches
+        Write-Verbose "---------Varaible Groups---------"
+        Write-Verbose $variableGroups
+        Write-Verbose "---------Varaible Groups---------"
 
-        return $branches.value
+        $variableGroups.value    
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
-
