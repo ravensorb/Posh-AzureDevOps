@@ -38,8 +38,8 @@ This module provides a way to work with most of Azure DevOps from PowerShell.  I
 * Set-AzDoVariableGroupPermissionInheritance
 
 ### Projects
-Get-AzDoProjectDetails
-Get-AzDoProjects
+* Get-AzDoProjectDetails
+* Get-AzDoProjects
 
 ### Release Definitions
 * Add-AzDoReleasePipelineVaraibleGroup
