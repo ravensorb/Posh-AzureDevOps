@@ -31,21 +31,21 @@ BEGIN
 PROCESS
 {
 
-    #if ([string]::IsNullOrEmpty($ProjectUrl)) { throw "Project Url is Required"}
+    #if ([string]::IsNullOrEmpty($ProjectUrl)) { Write-Error -ErrorAction $errorPreference -Message "Project Url is Required"}
 
-    if ([string]::IsNullOrEmpty($RepoName)) { throw "RepoName is Required"}
+    if ([string]::IsNullOrEmpty($RepoName)) { Write-Error -ErrorAction $errorPreference -Message "RepoName is Required"}
 
-    if ([string]::IsNullOrEmpty($BuildDefinitionName)) { throw "BuildDefinitionName is Required"}
-    if ([string]::IsNullOrEmpty($BuildVariableName)) { throw "BuildVariableName is Required"}
-    if ([string]::IsNullOrEmpty($BuildVariableValue)) { throw "BuildVariableValue is Required"}
+    if ([string]::IsNullOrEmpty($BuildDefinitionName)) { Write-Error -ErrorAction $errorPreference -Message "BuildDefinitionName is Required"}
+    if ([string]::IsNullOrEmpty($BuildVariableName)) { Write-Error -ErrorAction $errorPreference -Message "BuildVariableName is Required"}
+    if ([string]::IsNullOrEmpty($BuildVariableValue)) { Write-Error -ErrorAction $errorPreference -Message "BuildVariableValue is Required"}
 
-    if ([string]::IsNullOrEmpty($ReleaseDefinitionName)) { throw "ReleaseDefinitionName is Required"}
-    if ([string]::IsNullOrEmpty($ReleaseVariableName)) { throw "ReleaseVariableName is Required"}
-    if ([string]::IsNullOrEmpty($ReleaseVariableValue)) { throw "ReleaseVariableValue is Required"}
+    if ([string]::IsNullOrEmpty($ReleaseDefinitionName)) { Write-Error -ErrorAction $errorPreference -Message "ReleaseDefinitionName is Required"}
+    if ([string]::IsNullOrEmpty($ReleaseVariableName)) { Write-Error -ErrorAction $errorPreference -Message "ReleaseVariableName is Required"}
+    if ([string]::IsNullOrEmpty($ReleaseVariableValue)) { Write-Error -ErrorAction $errorPreference -Message "ReleaseVariableValue is Required"}
 
-    if ([string]::IsNullOrEmpty($LibraryVariableGroupName)) { throw "LibraryVariableGroupName is Required"}
-    if ([string]::IsNullOrEmpty($LibraryVariableName)) { throw "LibraryVariableName is Required"}
-    if ([string]::IsNullOrEmpty($LibraryVariableValue)) { throw "LibraryVariableValue is Required"}
+    if ([string]::IsNullOrEmpty($LibraryVariableGroupName)) { Write-Error -ErrorAction $errorPreference -Message "LibraryVariableGroupName is Required"}
+    if ([string]::IsNullOrEmpty($LibraryVariableName)) { Write-Error -ErrorAction $errorPreference -Message "LibraryVariableName is Required"}
+    if ([string]::IsNullOrEmpty($LibraryVariableValue)) { Write-Error -ErrorAction $errorPreference -Message "LibraryVariableValue is Required"}
 
     ##################################################################################################################
     ##################################################################################################################

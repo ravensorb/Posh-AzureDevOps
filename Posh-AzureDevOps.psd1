@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.0'
+ModuleVersion = '1.0.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -51,10 +51,10 @@ Description = 'Powershell Module for Azure DevOps'
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-RequiredModules = @('.\bin\PoshAzDoClasses.dll')
+# RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-# RequiredAssemblies = @()
+RequiredAssemblies = @('.\bin\PoshAzDoClasses.dll')
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
 # ScriptsToProcess = @()
@@ -66,10 +66,53 @@ RequiredModules = @('.\bin\PoshAzDoClasses.dll')
 # FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-# NestedModules = @()
+NestedModules = @('.\modules\Builds\Add-AzDoBuildPipelineVariable.psm1',
+               '.\modules\Builds\Get-AzDoBuildDefinition.psm1',
+               '.\modules\Builds\Get-AzDoBuildPipelineVariables.psm1',
+               '.\modules\Builds\Get-AzDoBuilds.psm1',
+               '.\modules\Builds\Get-AzDoBuildWorkItems.psm1',
+               '.\modules\Builds\Remove-AzDoBuildPipelineVariable.psm1',
+               '.\modules\Libraries\Add-AzDoLibraryVariable.psm1',
+               '.\modules\Libraries\Add-AzDoVariableGroupResourceAssignment.psm1',
+               '.\modules\Libraries\Get-AzDoVariableGroupResourceAssignment.psm1',
+               '.\modules\Libraries\Get-AzDoVariableGroupRoleDefinitions.psm1',
+               '.\modules\Libraries\Get-AzDoVariableGroups.psm1',
+               '.\modules\Libraries\Import-AzDoLibraryVariables.psm1',
+               '.\modules\Libraries\New-AzDoLibraryVariableGroup.psm1',
+               '.\modules\Libraries\Remove-AzDoLibraryVariable.psm1',
+               '.\modules\Libraries\Remove-AzDoLibraryVariableGroup.psm1',
+               '.\modules\Libraries\Remove-AzDoVariableGroupResourceAssignment.psm1',
+               '.\modules\Libraries\Set-AzDoVariableGroupPermissionInheritance.psm1',
+               '.\modules\Projects\Get-AzDoProjectDetails.psm1',
+               '.\modules\Projects\Get-AzDoProjects.psm1',
+               '.\modules\Releases\Add-AzDoReleasePipelineVaraibleGroup.psm1',
+               '.\modules\Releases\Add-AzDoReleasePipelineVariable.psm1',
+               '.\modules\Releases\Get-AzDoRelease.psm1',
+               '.\modules\Releases\Get-AzDoReleaseDefinition.psm1',
+               '.\modules\Releases\Get-AzDoReleasePipelineVariableGroups.psm1',
+               '.\modules\Releases\Get-AzDoReleasePipelineVariables.psm1',
+               '.\modules\Releases\Get-AzDoReleaseWorkItems.psm1',
+               '.\modules\Releases\Remove-AzDoReleasePipelineVariable.psm1',
+               '.\modules\Repos\Get-AzDoRepoBranches.psm1',
+               '.\modules\Security\Get-AzDoSecurityGroupMemebers.psm1',
+               '.\modules\Security\Get-AzDoSecurityGroups.psm1',
+               '.\modules\Security\Get-AzDoTeamMembers.psm1',
+               '.\modules\Security\Get-AzDoTeams.psm1',
+               '.\modules\Security\Get-AzDoUserDetails.psm1',
+               '.\modules\Security\Get-AzDoUsers.psm1',
+               '.\modules\Security\New-AzDoSecurityGroup.psm1',
+               '.\modules\Security\New-AzDoTeam.psm1',
+               '.\modules\Security\Rempve-AzDoSecurityGroup.psm1',
+               '.\modules\Security\Rempve-AzDoTeam.psm1',
+               '.\modules\Utilities\Connect-AzDo.psm1',
+               '.\modules\Utilities\Get-AzDoActiveConnection.psm1',
+               '.\modules\Utilities\Get-AzDoApiUrl.psm1',
+               '.\modules\Utilities\Get-AzDoDescriptors.psm1',
+               '.\modules\Utilities\Get-AzDoHttpHeader.psm1',
+               '.\modules\Utilities\Set-AzDoGlobalVariables.psm1')
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @()
+FunctionsToExport = @('*')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
@@ -84,44 +127,53 @@ AliasesToExport = @()
 # DscResourcesToExport = @()
 
 # List of all modules packaged with this module
-ModuleList = @('.\modules\Builds\Add-AzDoBuildPipelineVariable.psm1', 
-               '.\modules\Builds\Get-AzDoBuildDefinition.psm1', 
-               '.\modules\Builds\Get-AzDoBuildPipelineVariables.psm1', 
-               '.\modules\Builds\Get-AzDoBuilds.psm1', 
-               '.\modules\Builds\Get-AzDoBuildWorkItems.psm1', 
-               '.\modules\Builds\Remove-AzDoBuildPipelineVariable.psm1', 
-               '.\modules\Libraries\Add-AzDoLibraryVariable.psm1', 
-               '.\modules\Libraries\Get-AzDoVariableGroups.psm1', 
-               '.\modules\Libraries\Import-AzDoLibraryVariables.psm1', 
-               '.\modules\Libraries\New-AzDoLibraryVariableGroup.psm1', 
-               '.\modules\Libraries\Remove-AzDoLibraryVariable.psm1', 
-               '.\modules\Libraries\Remove-AzDoLibraryVariableGroup.psm1', 
-               '.\modules\Projects\Get-AzDoProjectDetails.psm1', 
-               '.\modules\Projects\Get-AzDoProjects.psm1', 
-               '.\modules\Releases\Add-AzDoReleasePipelineVaraibleGroup.psm1', 
-               '.\modules\Releases\Add-AzDoReleasePipelineVariable.psm1', 
-               '.\modules\Releases\Get-AzDoRelease.psm1', 
-               '.\modules\Releases\Get-AzDoReleaseDefinition.psm1', 
-               '.\modules\Releases\Get-AzDoReleasePipelineVariableGroups.psm1', 
-               '.\modules\Releases\Get-AzDoReleasePipelineVariables.psm1', 
-               '.\modules\Releases\Get-AzDoReleaseWorkItems.psm1', 
-               '.\modules\Releases\Remove-AzDoReleasePipelineVariable.psm1', 
-               '.\modules\Repos\Get-AzDoRepoBranches.psm1', 
-               '.\modules\Security\Get-AzDoSecurityGroupMemebers.psm1', 
-               '.\modules\Security\Get-AzDoSecurityGroups.psm1', 
-               '.\modules\Security\Get-AzDoTeamMembers.psm1', 
-               '.\modules\Security\Get-AzDoTeams.psm1', 
-               '.\modules\Security\Get-AzDoUserDetails.psm1', 
-               '.\modules\Security\Get-AzDoUsers.psm1', 
-               '.\modules\Utilities\Connect-AzDo.psm1', 
-               '.\modules\Utilities\Get-AzDoActiveConnection.psm1', 
-               '.\modules\Utilities\Get-AzDoApiUrl.psm1', 
-               '.\modules\Utilities\Get-AzDoDescriptors.psm1', 
-               '.\modules\Utilities\Get-AzDoHttpHeader.psm1', 
-               '.\modules\Utilities\Set-AzDoGlobalVariables.psm1')
+# ModuleList = @()
 
 # List of all files packaged with this module
-# FileList = @()
+FileList = @('.\modules\Builds\Add-AzDoBuildPipelineVariable.psm1',
+               '.\modules\Builds\Get-AzDoBuildDefinition.psm1',
+               '.\modules\Builds\Get-AzDoBuildPipelineVariables.psm1',
+               '.\modules\Builds\Get-AzDoBuilds.psm1',
+               '.\modules\Builds\Get-AzDoBuildWorkItems.psm1',
+               '.\modules\Builds\Remove-AzDoBuildPipelineVariable.psm1',
+               '.\modules\Libraries\Add-AzDoLibraryVariable.psm1',
+               '.\modules\Libraries\Add-AzDoVariableGroupResourceAssignment.psm1',
+               '.\modules\Libraries\Get-AzDoVariableGroupResourceAssignment.psm1',
+               '.\modules\Libraries\Get-AzDoVariableGroupRoleDefinitions.psm1',
+               '.\modules\Libraries\Get-AzDoVariableGroups.psm1',
+               '.\modules\Libraries\Import-AzDoLibraryVariables.psm1',
+               '.\modules\Libraries\New-AzDoLibraryVariableGroup.psm1',
+               '.\modules\Libraries\Remove-AzDoLibraryVariable.psm1',
+               '.\modules\Libraries\Remove-AzDoLibraryVariableGroup.psm1',
+               '.\modules\Libraries\Remove-AzDoVariableGroupResourceAssignment.psm1',
+               '.\modules\Libraries\Set-AzDoVariableGroupPermissionInheritance.psm1',
+               '.\modules\Projects\Get-AzDoProjectDetails.psm1',
+               '.\modules\Projects\Get-AzDoProjects.psm1',
+               '.\modules\Releases\Add-AzDoReleasePipelineVaraibleGroup.psm1',
+               '.\modules\Releases\Add-AzDoReleasePipelineVariable.psm1',
+               '.\modules\Releases\Get-AzDoRelease.psm1',
+               '.\modules\Releases\Get-AzDoReleaseDefinition.psm1',
+               '.\modules\Releases\Get-AzDoReleasePipelineVariableGroups.psm1',
+               '.\modules\Releases\Get-AzDoReleasePipelineVariables.psm1',
+               '.\modules\Releases\Get-AzDoReleaseWorkItems.psm1',
+               '.\modules\Releases\Remove-AzDoReleasePipelineVariable.psm1',
+               '.\modules\Repos\Get-AzDoRepoBranches.psm1',
+               '.\modules\Security\Get-AzDoSecurityGroupMemebers.psm1',
+               '.\modules\Security\Get-AzDoSecurityGroups.psm1',
+               '.\modules\Security\Get-AzDoTeamMembers.psm1',
+               '.\modules\Security\Get-AzDoTeams.psm1',
+               '.\modules\Security\Get-AzDoUserDetails.psm1',
+               '.\modules\Security\Get-AzDoUsers.psm1',
+               '.\modules\Security\New-AzDoSecurityGroup.psm1',
+               '.\modules\Security\New-AzDoTeam.psm1',
+               '.\modules\Security\Remove-AzDoSecurityGroup.psm1',
+               '.\modules\Security\Remove-AzDoTeam.psm1',
+               '.\modules\Utilities\Connect-AzDo.psm1',
+               '.\modules\Utilities\Get-AzDoActiveConnection.psm1',
+               '.\modules\Utilities\Get-AzDoApiUrl.psm1',
+               '.\modules\Utilities\Get-AzDoDescriptors.psm1',
+               '.\modules\Utilities\Get-AzDoHttpHeader.psm1',
+               '.\modules\Utilities\Set-AzDoGlobalVariables.psm1')
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
@@ -141,7 +193,7 @@ PrivateData = @{
         IconUri = 'https://github.com/ravensorb/Posh-AzureDevOps'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Initial Version'
+        ReleaseNotes = 'Cleanup and Fixes'
 
         # External dependent modules of this module
         # ExternalModuleDependencies = ''
@@ -154,7 +206,7 @@ PrivateData = @{
 HelpInfoURI = 'https://github.com/ravensorb/Posh-AzureDevOps'
 
 # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
-DefaultCommandPrefix = 'AzDo'
+DefaultCommandPrefix = ''
 
 }
 

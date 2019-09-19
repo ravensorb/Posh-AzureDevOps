@@ -47,7 +47,12 @@ function Remove-AzDoLibraryVariable()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
     
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1" }
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
@@ -56,7 +61,7 @@ function Remove-AzDoLibraryVariable()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -69,14 +74,14 @@ function Remove-AzDoLibraryVariable()
     {
         if ([string]::IsNullOrEmpty($VariableGroupName) -and [string]::IsNullOrEmpty($VariableGroupId))
         {
-            throw "Specify either Variable Group Name or Variable Group Id"
+            Write-Error -ErrorAction $errorPreference -Message "Specify either Variable Group Name or Variable Group Id"
         }
 
         $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -eq $VariableGroupName -or $_.id -eq $VariableGroupId }
 
         if(-Not $variableGroup)
         {
-            throw "Cannot add variable to nonexisting variable group $VariableGroupName; use the -Force switch to create the variable group."
+            Write-Error -ErrorAction $errorPreference -Message "Cannot add variable to nonexisting variable group $VariableGroupName; use the -Force switch to create the variable group."
 
         }
 
@@ -110,7 +115,6 @@ function Remove-AzDoLibraryVariable()
         Write-Verbose "Response: $($response.id)"
 
         #$response
-        return $true
     }
     END
     {

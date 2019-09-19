@@ -19,7 +19,12 @@ function Get-AzDoHttpHeader()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
@@ -27,7 +32,7 @@ function Get-AzDoHttpHeader()
         {
             if ([string]::IsNullOrEmpty($ProjectUrl))
             {
-                throw "AzDoConnection or ProjectUrl must be valid"
+                Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid"
             }
         }
 

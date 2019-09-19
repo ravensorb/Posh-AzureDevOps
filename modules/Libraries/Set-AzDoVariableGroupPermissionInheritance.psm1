@@ -42,7 +42,12 @@ function Set-AzDoVariableGroupPermissionInheritance()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
     
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.2-preview.1" }
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.2-preview.1" }
@@ -51,7 +56,7 @@ function Set-AzDoVariableGroupPermissionInheritance()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -63,14 +68,14 @@ function Set-AzDoVariableGroupPermissionInheritance()
     {
         if ([string]::IsNullOrEmpty($VariableGroupName) -and [string]::IsNullOrEmpty($VariableGroupId))
         {
-            throw "Specify either Variable Group Name or Variable Group Id"
+            Write-Error -ErrorAction $errorPreference -Message "Specify either Variable Group Name or Variable Group Id"
         }
 
         $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -eq $VariableGroupName -or $_.id -eq $VariableGroupId }
 
         if ($variableGroup -eq $null)
         {
-            throw "Variable Group could not be found"
+            Write-Error -ErrorAction $errorPreference -Message "Variable Group could not be found"
         }
 
         # PATCH /_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/5d4ef62e-538a-42e9-a02e-e25bce16abee%245?inheritPermissions=false
@@ -80,7 +85,11 @@ function Set-AzDoVariableGroupPermissionInheritance()
 
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/$($AzDoConnection.ProjectId)`$$($variableGroup.Id)" -QueryStringParams $apiParams
 
-        Invoke-RestMethod -Method PATCH -Uri $apiUrl -Headers $AzDoConnection.HttpHeaders
+        $response = Invoke-RestMethod -Method PATCH -Uri $apiUrl -Headers $AzDoConnection.HttpHeaders
+
+        Write-Verbose "Response: $($response.id)"
+
+        #$response
     }
     END 
     { 

@@ -46,7 +46,12 @@ function Connect-AzDo()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "Parameter Values"
@@ -76,7 +81,7 @@ function Connect-AzDo()
             }
         }
         catch {
-            throw "Project $($azdoConnection.ProjectName) does not exist"            
+            Write-Error -ErrorAction $errorPreference -Message "Project $($azdoConnection.ProjectName) does not exist"            
         }
 
         $azdoConnection.ProjectDescriptor = Get-AzDoDescriptors -AzDoConnection $azdoConnection

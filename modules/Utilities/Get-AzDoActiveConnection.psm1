@@ -10,7 +10,12 @@ function Get-AzDoActiveConnection()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        # $errorPreference = 'Stop'
+        # if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+        #     $errorPreference = $PSBoundParameters['ErrorAction']
+        # }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "`tParameter Values"

@@ -44,7 +44,12 @@ function Add-AzDoVariableGroupResourceAssignment()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
     
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.1-preview" }
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.1-preview" }
@@ -53,7 +58,7 @@ function Add-AzDoVariableGroupResourceAssignment()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -65,26 +70,26 @@ function Add-AzDoVariableGroupResourceAssignment()
     {
         if ([string]::IsNullOrEmpty($VariableGroupName) -and [string]::IsNullOrEmpty($VariableGroupId))
         {
-            throw "Specify either Variable Group Name or Variable Group Id"
+            Write-Error -ErrorAction $errorPreference -Message "Specify either Variable Group Name or Variable Group Id"
         }
 
         $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -clike $VariableGroupName -or $_.id -eq $VariableGroupId }
 
         if ($variableGroup -eq $null)
         {
-            throw "Variable Group '[$($VariableGroupId)]:$($VariableGroupName)' not found"
+            Write-Error -ErrorAction $errorPreference -Message "Variable Group '[$($VariableGroupId)]:$($VariableGroupName)' not found"
         }
 
-        $userOrGroup = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection | ? { $_.displayName -eq $UserOrGroupName}
+        $userOrGroup = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection | ? { $_.displayName -eq $UserOrGroupName -or $_.principalName -eq $UserOrGroupName}
         if ($userOrGroup -eq $null)
         {
             Write-Verbose "Group not found, looking for user"
-            $userOrGroup = Get-AzDoUsers -AzDoConnection $AzDoConnection | ? { $_.displayName -eq $UserOrGroupName}
+            $userOrGroup = Get-AzDoUsers -AzDoConnection $AzDoConnection | ? { $_.displayName -eq $UserOrGroupName -or $_.principalName -eq $UserOrGroupName}
         }
 
         if ($userOrGroup -eq $null)
         {
-            throw "User/Group not found"
+            Write-Error -ErrorAction $errorPreference -Message "User/Group not found"
         }
 
         # PUT https://<acct>.visualstudio.com/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/<projID>$<VarGroupID>?api-version=5.0-preview.1
@@ -102,8 +107,10 @@ function Add-AzDoVariableGroupResourceAssignment()
 
         # {"count":1,"value":[{"identity":{"displayName":"[3Pager]\\Variable Groups Managers - AWS","id":"e208eaf7-5b55-40a9-8898-0d43ade92799","uniqueName":"[3Pager]\\Variable Groups Managers - AWS"},"role":{"displayName":"User","name":"User","allowPermissions":17,"denyPermissions":0,"identifier":"distributedtask.variablegroup.User","description":"User can use, but cannot manage the library items.","scope":"distributedtask.variablegroup"},"access":"assigned","accessDisplayName":"Assigned"}]}
         $respomse = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
+        
+        Write-Verbose "Response: $($response.id)"
 
-        $respomse
+        $response
     }
     END 
     { 

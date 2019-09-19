@@ -77,7 +77,7 @@ function Add-AzDoBuildPipelineVariable()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -98,7 +98,7 @@ function Add-AzDoBuildPipelineVariable()
             $definition = Get-AzDoBuildDefinition -AzDoConnection $AzDoConnection -BuildDefinitionName $BuildDefinitionName -ExpandFields "variables"
         }
 
-        if ($definition -eq $null) { throw "Could not find a valid build definition.  Check your parameters and try again";}
+        if ($definition -eq $null) { Write-Error -ErrorAction $errorPreference -Message "Could not find a valid build definition.  Check your parameters and try again";}
 
         if ($Reset)
         {

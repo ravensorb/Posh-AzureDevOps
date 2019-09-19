@@ -1,7 +1,7 @@
 <#
 
 .SYNOPSIS
-This command provides accesss Build Pipeline Varaibles from Azure DevOps
+This commend provides accesss Build Pipeline Varaibles from Azure DevOps
 
 .DESCRIPTION
 The  command will retrieve all of the variables in a specific build pipeline
@@ -47,7 +47,12 @@ function Get-AzDoBuildPipelineVariables()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
     
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
@@ -55,10 +60,10 @@ function Get-AzDoBuildPipelineVariables()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
+            if ($null -eq $AzDoConnection) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
         
-        if ($BuildDefinitionId -eq $null -and [string]::IsNullOrEmpty($BuildDefinitionName)) { throw "Definition ID or Name must be specified"; }
+        if ($BuildDefinitionId -eq $null -and [string]::IsNullOrEmpty($BuildDefinitionName)) { Write-Error -ErrorAction $errorPreference -Message "Definition ID or Name must be specified"; }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "`tParameter Values"
@@ -80,7 +85,7 @@ function Get-AzDoBuildPipelineVariables()
             $definition = Get-AzDoBuildDefinition -AzDoConnection $AzDoConnection -BuildDefinitionName $BuildDefinitionName 
         }
 
-        if ($null -eq $definition) { throw "Could not find a valid build definition.  Check your parameters and try again"; }
+        if ($null -eq $definition) { Write-Error -ErrorAction $errorPreference -Message "Could not find a valid build definition.  Check your parameters and try again"; }
 
         $apiParams = @()
 

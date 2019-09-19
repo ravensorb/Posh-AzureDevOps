@@ -15,7 +15,12 @@ function Get-AzDoApiUrl()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        # $errorPreference = 'Stop'
+        # if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+        #     $errorPreference = $PSBoundParameters['ErrorAction']
+        # }
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0" }
 

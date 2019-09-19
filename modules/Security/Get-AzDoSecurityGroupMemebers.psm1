@@ -47,7 +47,12 @@ function Get-AzDoSecurityGroupMembers()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1" }
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
@@ -56,7 +61,7 @@ function Get-AzDoSecurityGroupMembers()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
+            if ($null -eq $AzDoConnection) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -66,12 +71,12 @@ function Get-AzDoSecurityGroupMembers()
     PROCESS
     {
         if ($GroupId -ne [Guid]::Empty) {
-            $group = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection -GroupId $GroupId
+            $group = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection  | ? { $_.id -eq $GroupId }
         } else {
-            $group = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection -GroupName $GroupName
+            $group = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection  | ? { $_.displayName -eq $GroupName -or $_.principalName -eq $GroupName} 
         }
 
-        if ($null -eq $group) { throw "Specified group not found" }
+        if ($null -eq $group) { Write-Error -ErrorAction $errorPreference -Message "Specified group not found" }
 
         $apiParams = @()
 

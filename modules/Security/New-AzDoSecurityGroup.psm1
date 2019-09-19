@@ -47,7 +47,12 @@ function New-AzDoSecurityGroup()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1" }
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
@@ -56,7 +61,7 @@ function New-AzDoSecurityGroup()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
+            if ($null -eq $AzDoConnection) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"

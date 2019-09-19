@@ -53,7 +53,12 @@ function Remove-AzDoBuildPipelineVariable()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
 
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
@@ -61,7 +66,7 @@ function Remove-AzDoBuildPipelineVariable()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -81,7 +86,7 @@ function Remove-AzDoBuildPipelineVariable()
             $definition = Get-AzDoBuildDefinition -AzDoConnection $AzDoConnection -BuildDefinitionName $BuildDefinitionName -ExpandFields "variables"
         }
 
-        if ($definition -eq $null) { throw "Could not find a valid build definition.  Check your parameters and try again";}
+        if ($definition -eq $null) { Write-Error -ErrorAction $errorPreference -Message "Could not find a valid build definition.  Check your parameters and try again";}
 
         [bool]$found = $false
         foreach($prop in $definition.variables.PSObject.Properties.Where{$_.MemberType -eq "NoteProperty" -and (($_.Name -eq $VariableName) -or $All)})

@@ -46,7 +46,12 @@ function Get-AzDoTeamMemebers()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
 
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.2" }
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.2"}
@@ -56,10 +61,10 @@ function Get-AzDoTeamMemebers()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($null -eq $AzDoConnection) { throw "AzDoConnection or ProjectUrl must be valid" }
+            if ($null -eq $AzDoConnection) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
-        if ([string]::IsNullOrEmpty($TeamName) -and [string]::IsNullOrEmpty($TeamId)) { throw "Specify a Tean Name or Team ID" }
+        if ([string]::IsNullOrEmpty($TeamName) -and [string]::IsNullOrEmpty($TeamId)) { Write-Error -ErrorAction $errorPreference -Message "Specify a Tean Name or Team ID" }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "`tParameter Values"

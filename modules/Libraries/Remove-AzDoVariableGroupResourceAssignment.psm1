@@ -49,16 +49,21 @@ function Remove-AzDoVariableGroupResourceAssignment()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
     
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.1-preview" }
-        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.1-preview" }
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.2-preview" }
+        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.2-preview" }
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -69,46 +74,49 @@ function Remove-AzDoVariableGroupResourceAssignment()
     {
         if ([string]::IsNullOrEmpty($VariableGroupName) -and [string]::IsNullOrEmpty($VariableGroupId))
         {
-            throw "Specify either Variable Group Name or Variable Group Id"
+            Write-Error -ErrorAction $errorPreference -Message "Specify either Variable Group Name or Variable Group Id"
         }
 
         $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -clike $VariableGroupName -or $_.id -eq $VariableGroupId }
 
         if ($variableGroup -eq $null)
         {
-            throw "Variable Group '[$($VariableGroupId)]:$($VariableGroupName)' not found"
+            Write-Error -ErrorAction $errorPreference -Message "Variable Group '[$($VariableGroupId)]:$($VariableGroupName)' not found"
         }
 
-        $userOrGroup = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection | ? { $_.displayName -eq $UserOrGroupName}
-        if ($userOrGroup -eq $null)
+        $resourceAssignments = Get-AzDoVariableGroupResourceAssignment -VariableGroupName $($variableGroup.name) | ? {$_.access -eq "assigned" -and ($_.identity.displayName -eq $UserOrGroupName -or $_.identity.principalName -eq $UserOrGroupName) } 
+
+        if ($resourceAssignments -eq $null -or $resourceAssignments.length -eq 0)
         {
-            Write-Verbose "Group not found, looking for user"
-            $userOrGroup = Get-AzDoUsers -AzDoConnection $AzDoConnection | ? { $_.displayName -eq $UserOrGroupName}
+            Write-Error -ErrorAction $errorPreference -Message "User/Group '$($UserOrGroupName)' not found"
+        }
+        #Write-Verbose $resourceAssignments.identity
+
+        $assignmentsToDelete = @()
+        $assignmentsToDelete += ""
+
+        $resourceAssignments.identity | % {
+            Write-Verbose "Removing User/Group: '$($_.displayName)' from '$($VariableGroupName)'"
+            $assignmentsToDelete += $_.id
         }
 
-        if ($userOrGroup -eq $null)
-        {
-            throw "User/Group not found"
-        }
-
-        # https://dev.azure.com/3pager/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/5d4ef62e-538a-42e9-a02e-e25bce16abee%245
-
-        # PUT https://<acct>.visualstudio.com/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/<projID>$<VarGroupID>?api-version=5.0-preview.1
-        # [{"roleName":"<role>","userId":",<UserGUID>"}]
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/$($AzDoConnection.ProjectId)`$$($variableGroup.Id)"
-
-        $body = "['$($userOrGroup.originId)']"
-
-        #$roleDetails = @{roleName=$RoleName;userid=$($userOrGroup.originId)}
-        #$body = $roleDetails | ConvertTo-Json -Depth 10 -Compress
+        $body = $assignmentsToDelete | ConvertTo-Json -Depth 10 -Compress
+        $body = $body.Replace("`"`",","")
 
         Write-Verbose "---------BODY---------"
         Write-Verbose $body
         Write-Verbose "---------BODY---------"
 
-        $response = Invoke-RestMethod $apiUrl -Method PATCH -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+        # https://dev.azure.com/3pager/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/5d4ef62e-538a-42e9-a02e-e25bce16abee%245
+        # PUT https://<acct>.visualstudio.com/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/<projID>$<VarGroupID>?api-version=5.0-preview.1
+        # [{"roleName":"<role>","userId":",<UserGUID>"}]
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/$($AzDoConnection.ProjectId)`$$($variableGroup.Id)"
 
-        $response
+        $respomse = Invoke-RestMethod $apiUrl -Method PATCH -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)  
+
+        Write-Verbose "Response: $($response.id)"
+
+        #$respomse
     }
     END 
     { 

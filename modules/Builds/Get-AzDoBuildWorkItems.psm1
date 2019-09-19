@@ -41,7 +41,12 @@ function Get-AzDoBuildWorkItems()
         if (-not $PSBoundParameters.ContainsKey('Verbose'))
         {
             $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }        
+        }  
+
+        $errorPreference = 'Stop'
+        if ( $PSBoundParameters.ContainsKey('ErrorAction')) {
+            $errorPreference = $PSBoundParameters['ErrorAction']
+        }
     
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0"}
 
@@ -49,10 +54,10 @@ function Get-AzDoBuildWorkItems()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { throw "AzDoConnection or ProjectUrl must be valid" }
+            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
-        if ($BuildId -eq $null) { throw "Build ID must be specified"; }
+        if ($BuildId -eq $null) { Write-Error -ErrorAction $errorPreference -Message "Build ID must be specified"; }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
         Write-Verbose "`tParameter Values"
