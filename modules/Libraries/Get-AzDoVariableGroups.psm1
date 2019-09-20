@@ -4,7 +4,7 @@
 Get all variables in a specific Azure DevOps libary
 
 .DESCRIPTION
-The  command will retreive all variables to the specificed library
+The  command will retreive all variables to the specificed variable group
 
 .PARAMETER VariableGroupName
 The name of the variable group to retrieve

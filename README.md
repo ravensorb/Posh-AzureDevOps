@@ -25,15 +25,15 @@ This module provides a way to work with most of Azure DevOps from PowerShell.  I
 * Remove-AzDoBuildPipelineVariable
 
 ### Libraries
-* Add-AzDoLibraryVariable
+* Add-AzDoVariableGroupVariable
 * Add-AzDoVariableGroupResourceAssignment
 * Get-AzDoVariableGroupResourceAssignment
 * Get-AzDoVariableGroupRoleDefinitions
 * Get-AzDoVariableGroups
-* Import-AzDoLibraryVariables
-* New-AzDoLibraryVariableGroup
-* Remove-AzDoLibraryVariable
-* Remove-AzDoLibraryVariableGroup
+* Import-AzDoVariableGroupVariables
+* New-AzDoVariableGroupVariables
+* Remove-AzDoVariableGroupVariable
+* Remove-AzDoVariableGroup
 * Remove-AzDoVariableGroupResourceAssignment
 * Set-AzDoVariableGroupPermissionInheritance
 
@@ -74,7 +74,7 @@ This module provides a way to work with most of Azure DevOps from PowerShell.  I
 ### Working With Libraries
 For some quick background, check out this blog article: http://itramblings.com/2019/03/managing-vsts-tfs-release-definition-variables-from-powershell/
 
-#### Import-AzDoLibraryVariables
+#### Import-AzDoVariableGroupVariables
 This script will do a bulk import from a CSV file into a specific Azure DevOps Variable group.  
 
 **Parameters**

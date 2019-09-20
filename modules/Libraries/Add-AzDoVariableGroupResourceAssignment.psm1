@@ -4,7 +4,7 @@
 Add permission for a specific Azure DevOps libary
 
 .DESCRIPTION
-The command will add the permissions for the specificed library
+The command will add the permissions for the specificed variable group
 
 .PARAMETER VariableGroupName
 The name of the variable group to retrieve

@@ -25,10 +25,10 @@ Indicates if the vaule should be stored as a "secret"
 A comment to add to the variable
 
 .PARAMETER Reset
-Indicates if the ENTIRE library should be reset. This means that ALL values are REMOVED. Use with caution
+Indicates if the ENTIRE variable group should be reset. This means that ALL values are REMOVED. Use with caution
 
 .PARAMETER Force
-Indicates if the library group should be created if it doesn't exist
+Indicates if the variable group should be created if it doesn't exist
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)

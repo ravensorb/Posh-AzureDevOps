@@ -16,7 +16,7 @@ The name of the build definition to update (use on this OR the id parameter)
 Tha name of the variable to create/update
 
 .PARAMETER All
-Remove all variables in the library (VariableName is ignored when this is set)
+Remove all variables in the variable group (VariableName is ignored when this is set)
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)

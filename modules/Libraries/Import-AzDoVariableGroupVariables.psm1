@@ -16,16 +16,16 @@ The name of the variable group in the library to import the values into
 This is an option parameter and is used to file the variables that are imported by environment (can also be a * for a wild card)
 
 .PARAMETER Reset
-Indicates if the ENTIRE library should be reset. This means that ALL values are REMOVED. Use with caution
+Indicates if the ENTIRE variable should be reset. This means that ALL values are REMOVED. Use with caution
 
 .PARAMETER Force
-Indicates if the library group should be created if it doesn't exist
+Indicates if the variable group should be created if it doesn't exist
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Import-AzDoLibraryVariables -CsvFile <csv file to import> -VariableGroupName <variable group to import into> -EnvironmentNameFilter <
+Import-AzDoVariableGroupVariables -CsvFile <csv file to import> -VariableGroupName <variable group to import into> -EnvironmentNameFilter <
 
 .NOTES
 
@@ -33,7 +33,7 @@ Import-AzDoLibraryVariables -CsvFile <csv file to import> -VariableGroupName <va
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Import-AzDoLibraryVariables()
+function Import-AzDoVariableGroupVariables()
 {
     [CmdletBinding()]
     param
@@ -95,7 +95,7 @@ function Import-AzDoLibraryVariables()
         Write-Verbose "Creating Variables in Group $VariableGroupName"
 
         # Note: We only want to run the reset once no matter what so we clear it after the first loop
-        $variables | % { Add-AzDoLibraryVariable -AzDoConnection $AzDoConnection -ApiVersion $ApiVersion -VariableGroupName $VariableGroupName -VariableName $($_.Name) -VariableValue $($_.Value) -Secret $($_.Secret) -Force:$Force -Reset:$Reset; $Reset = $null; $Force = $null }       
+        $variables | % { Add-AzDoVariableGroupVariable -AzDoConnection $AzDoConnection -ApiVersion $ApiVersion -VariableGroupName $VariableGroupName -VariableName $($_.Name) -VariableValue $($_.Value) -Secret $($_.Secret) -Force:$Force -Reset:$Reset; $Reset = $null; $Force = $null }       
 
         Write-Host "`tImported $($variables.Count) variables" -ForegroundColor Green
     }

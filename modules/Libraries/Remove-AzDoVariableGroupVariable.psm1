@@ -4,7 +4,7 @@
 Remove a variable from a specific Azure DevOps libary
 
 .DESCRIPTION
-The  command will removea variable to the specificed library
+The  command will remove a variable to the specificed variable group
 
 .PARAMETER VariableGroupName
 The name of the variable group to create/update
@@ -13,13 +13,13 @@ The name of the variable group to create/update
 Tha name of the variable to create/update
 
 .PARAMETER All
-Remove all variables in the library (VariableName is ignored when this is set)
+Remove all variables in the variable group (VariableName is ignored when this is set)
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Remove-AzDoLibraryVariable -VaraibleGroupName <name of variable group> -VariableName <variable name>
+Remove-AzDoVariableGroupVariable -VaraibleGroupName <name of variable group> -VariableName <variable name>
 
 .NOTES
 
@@ -27,7 +27,7 @@ Remove-AzDoLibraryVariable -VaraibleGroupName <name of variable group> -Variable
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Remove-AzDoLibraryVariable()
+function Remove-AzDoVariableGroupVariable()
 {
     [CmdletBinding()]
     param

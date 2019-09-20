@@ -4,7 +4,7 @@
 Remove permission for a specific Azure DevOps libary
 
 .DESCRIPTION
-The command will remove the permissions for the specificed library
+The command will remove the permissions for the specificed variable group
 
 .PARAMETER VariableGroupName
 The name of the variable group to retrieve
@@ -84,7 +84,7 @@ function Remove-AzDoVariableGroupResourceAssignment()
             Write-Error -ErrorAction $errorPreference -Message "Variable Group '[$($VariableGroupId)]:$($VariableGroupName)' not found"
         }
 
-        $resourceAssignments = Get-AzDoVariableGroupResourceAssignment -VariableGroupName $($variableGroup.name) | ? {$_.access -eq "assigned" -and ($_.identity.displayName -eq $UserOrGroupName -or $_.identity.principalName -eq $UserOrGroupName) } 
+        $resourceAssignments = Get-AzDoVariableGroupResourceAssignments -VariableGroupName $($variableGroup.name) | ? {$_.access -eq "assigned" -and ($_.identity.displayName -eq $UserOrGroupName -or $_.identity.principalName -eq $UserOrGroupName) } 
 
         if ($resourceAssignments -eq $null -or $resourceAssignments.length -eq 0)
         {

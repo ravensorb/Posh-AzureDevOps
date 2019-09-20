@@ -1,22 +1,22 @@
 <#
 
 .SYNOPSIS
-Create a new Library Variable Group
+Create a new Variable Group
 
 .DESCRIPTION
-The command will create a new library variable group
+The command will create a new variable group
 
 .PARAMETER VariableGroupName
 The name of the variable group to retrieve
 
 .PARAMETER Description
-A description for this library group
+A description for this variable group
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-New-AzDoLibraryVariableGroup -VariableGroupName <variable group name>
+New-AzDoVariableGroup -VariableGroupName <variable group name>
 
 .NOTES
 
@@ -24,7 +24,7 @@ New-AzDoLibraryVariableGroup -VariableGroupName <variable group name>
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function New-AzDoLibraryVariableGroup()
+function New-AzDoVariableGroup()
 {
     [CmdletBinding()]
     param
@@ -68,7 +68,7 @@ function New-AzDoLibraryVariableGroup()
     {
         $method = "Post"
 
-        $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection ? { $_.name -eq $VariableGroupName }
+        $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -eq $VariableGroupName }
 
         if ($variableGroup) 
         {

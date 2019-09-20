@@ -4,13 +4,13 @@
 Add/Replace a new variable to a specific Azure DevOps libary
 
 .DESCRIPTION
-The command will add/replace a variable to the specificed library
+The command will add/replace a variable to the specificed variable group
 
 .PARAMETER VariableGroupName
-The name of the variable group to create/update
+The name of the variable group to create/update (optional)
 
-.PARAMETER VariableGroupDescription
-A description for the variable group (only used if the group is created)
+.PARAMETER VariableGroupId
+A id for the variable group (optional)
 
 .PARAMETER VariableName
 Tha name of the variable to create/update
@@ -22,16 +22,16 @@ The variable for the variable
 Indicates if the vaule should be stored as a "secret"
 
 .PARAMETER Reset
-Indicates if the ENTIRE library should be reset. This means that ALL values are REMOVED. Use with caution
+Indicates if the ENTIRE variable group should be reset. This means that ALL values are REMOVED. Use with caution
 
 .PARAMETER Force
-Indicates if the library group should be created if it doesn't exist
+Indicates if the variable group should be created if it doesn't exist
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Add-AzDoLibraryVariable -VariableGroupName <variable group name> -VariableName <variable name> -VariableValue <some value>
+Add-AzDoVariableGroupVariable -VariableGroupName <variable group name> -VariableName <variable name> -VariableValue <some value>
 
 .NOTES
 
@@ -39,7 +39,7 @@ Add-AzDoLibraryVariable -VariableGroupName <variable group name> -VariableName <
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Add-AzDoLibraryVariable()
+function Add-AzDoVariableGroupVariable()
 {
     [CmdletBinding()]
     param
@@ -73,11 +73,11 @@ function Add-AzDoLibraryVariable()
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1" }
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
+            if ($null -eq $AzDoConnection) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"

@@ -4,7 +4,7 @@
 Get role definitions for a specific Azure DevOps libary
 
 .DESCRIPTION
-The  command will retreive the role definitions for the specificed library
+The  command will retreive the role definitions for the specificed variable group
 
 .PARAMETER VariableGroupName
 The name of the variable group to retrieve

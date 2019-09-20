@@ -4,7 +4,7 @@
 Get permissions for a specific Azure DevOps libary
 
 .DESCRIPTION
-The  command will retreive the permissions for the specificed library
+The  command will retreive the permissions for the specificed variable group
 
 .PARAMETER VariableGroupName
 The name of the variable group to retrieve
@@ -13,7 +13,7 @@ The name of the variable group to retrieve
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoVariableGroupResourceAssignment -VariableGroupName <variable group name>
+Get-AzDoVariableGroupResourceAssignments -VariableGroupName <variable group name>
 
 .NOTES
 
@@ -21,7 +21,7 @@ Get-AzDoVariableGroupResourceAssignment -VariableGroupName <variable group name>
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoVariableGroupResourceAssignment()
+function Get-AzDoVariableGroupResourceAssignments()
 {
     [CmdletBinding(
         DefaultParameterSetName="Name"
