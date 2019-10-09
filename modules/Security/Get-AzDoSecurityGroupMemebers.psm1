@@ -70,10 +70,12 @@ function Get-AzDoSecurityGroupMembers()
     }
     PROCESS
     {
+        $groups = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection
+
         if ($GroupId -ne [Guid]::Empty) {
-            $group = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection  | ? { $_.id -eq $GroupId }
+            $group = $groups | ? { $_.id -eq $GroupId }
         } else {
-            $group = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection  | ? { $_.displayName -eq $GroupName -or $_.principalName -eq $GroupName} 
+            $group = $groups | ? { $_.displayName -eq $GroupName -or $_.principalName -eq $GroupName} 
         }
 
         if ($null -eq $group) { Write-Error -ErrorAction $errorPreference -Message "Specified group not found" }
@@ -88,22 +90,41 @@ function Get-AzDoSecurityGroupMembers()
         $groupMembers = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------GROUP MEMBERS---------"
-        Write-Verbose $groupMembers
+        Write-Verbose $groupMembers -ErrorAction SilentlyContinue
         Write-Verbose "---------GROUP MEMBERS---------"
 
-        if ($groupMembers.count -ne $null)
+        if ($null -ne $groupMembers.count)
         {   
             foreach ($member in $groupMembers.value)
             {
                 Write-Verbose "Group Member: $($member.memberDescriptor)"
 
-                Get-AzDoUserDetails -UserDescriptor $($member.memberDescriptor)
+                if ($member.memberDescriptor -clike "vssgp.*")
+                {
+                    $g = $groups | ? { $_.displayName -eq $GroupName }
+
+                    Write-Verbose "`tGroup: $($g.displayName)"
+
+                    $g
+                }
+                elseif ($member.memberDescriptor -clike "aad.*")
+                {
+                    $u = Get-AzDoUserDetails -UserDescriptor $($member.memberDescriptor)
+
+                    Write-Verbose "`tUser: $($u.displayName)"
+
+                    $u
+                } else {
+                    Write-Verbose "Unknown Membership Descriptor: $($member.memberDescriptor)"
+                }
             }
         } 
-
-        Write-Verbose "No group members found."
+        else 
+        {
+            Write-Verbose "No group members found."
         
-        return $null
+            return $null
+        }
     }
     END { }
 }

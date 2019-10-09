@@ -71,23 +71,26 @@ function Get-AzDoVariableGroupResourceAssignments()
 
         $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -eq $VariableGroupName -or $_.id -eq $VariableGroupId }
 
-        if ($variableGroup -eq $null)
+        if ($null -eq $variableGroup)
         {
             Write-Error -ErrorAction $errorPreference -Message "Variable Group not found"
         }
 
-        $variableGroupRoleDefinitions = Get-AzDoVariableGroupRoleDefinitions -AzDoConnection $AzDoConnection
+        #$variableGroupRoleDefinitions = Get-AzDoVariableGroupRoleDefinitions -AzDoConnection $AzDoConnection
 
         # https://dev.azure.com/3pager/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/5d4ef62e-538a-42e9-a02e-e25bce16abee%245
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/$($AzDoConnection.ProjectId)`$$($variableGroup.Id)"
 
         $variableGroupResourceAssignments = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders 
 
-        Write-Verbose "---------Resource Assignments---------"
-        Write-Verbose $variableGroupResourceAssignments.value
-        Write-Verbose "---------Resource Assignments---------"
+        if ($null -ne $variableGroupResourceAssignments)
+        {
+            Write-Verbose "---------Resource Assignments---------"
+            Write-Verbose $variableGroupResourceAssignments.value
+            Write-Verbose "---------Resource Assignments---------"
 
-        $variableGroupResourceAssignments.value
+            $variableGroupResourceAssignments.value
+        }
     }
     END 
     { 
