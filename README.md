@@ -64,6 +64,7 @@ This module provides a way to work with most of Azure DevOps from PowerShell.  I
 * Get-AzDoRepoBranches
 
 ### Security
+* Add-AzDoSecurityGroupMemeber
 * Get-AzDoSecurityGroupMemebers
 * Get-AzDoSecurityGroups
 * Get-AzDoTeamMembers
@@ -73,6 +74,7 @@ This module provides a way to work with most of Azure DevOps from PowerShell.  I
 * New-AzDoSecurityGroup
 * New-AzDoTeam
 * Remove-AzDoSecurityGroup
+* Remove-AzDoSecurityGroupMemeber
 * Remove-AzDoTeam
 
 ### Utility

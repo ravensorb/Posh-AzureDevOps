@@ -1,10 +1,10 @@
 <#
 
 .SYNOPSIS
-This command provides remove a Security Group from Azure DevOps
+This command provides retrieve Service Endpoints Groups from Azure DevOps
 
 .DESCRIPTION
-The command will remove an Azure DevOps Security Group
+The command will retrieve Azure DevOps service endpoints (if they exists) 
 
 .PARAMETER AzDoConnect
 A valid AzDoConnection object
@@ -12,14 +12,8 @@ A valid AzDoConnection object
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
-.PARAMETER GroupId
-The id of the group to remove
-
-.PARAMETER GroupName
-The name of the group to remove
-
 .EXAMPLE
-Remove-AzDoSecurityGroup -GroupName <group name>
+Get-AzDoServiceEndpointRoles
 
 .NOTES
 
@@ -27,7 +21,7 @@ Remove-AzDoSecurityGroup -GroupName <group name>
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Remove-AzDoSecurityGroup()
+function Get-AzDoServiceEndpointRoles()
 {
     [CmdletBinding(
         DefaultParameterSetName="Name"
@@ -36,10 +30,9 @@ function Remove-AzDoSecurityGroup()
     (
         # Common Parameters
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [string]$ApiVersion = $global:AzDoApiVersion
 
         # Module Parameters
-        [string][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName = "Name")]$GroupName
     )
     BEGIN
     {
@@ -53,8 +46,8 @@ function Remove-AzDoSecurityGroup()
             $errorPreference = $PSBoundParameters['ErrorAction']
         }
 
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.2-preview.1" }
-        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.2-preview.1" }
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.0-preview.1" }
+        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.0-preview.1" }
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
@@ -69,21 +62,21 @@ function Remove-AzDoSecurityGroup()
     }
     PROCESS
     {
-        $groups = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection
-        $group = $groups | ? { $_.displayName -clike $GroupName -or $_.principalName -clike $GroupName} 
-
-        if (-Not $group)
-        {
-            Write-Error -ErrorAction $errorPreference -Message "Team specified was not found"
-        }
-
         $apiParams = @()
 
-        # DELETE https://vssps.dev.azure.com/{organization}/_apis/graph/groups/{groupDescriptor}?api-version=5.0-preview.1
+        # GET https://dev.azure.com/{organization}/_apis/securityroles/scopes/distributedtask.serviceendpointrole/roledefinitions
+        $apiUrl = Get-AzDoApiUrl -RootPath $AzDoConnection.OrganizationUrl -ApiVersion $ApiVersion -BaseApiPath "//_apis/securityroles/scopes/distributedtask.serviceendpointrole/roledefinitions" -QueryStringParams $apiParams
 
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.VsspUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/graph/groups/$($group.descriptor)" -QueryStringParams $apiParams
+        $results = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
+        
+        Write-Verbose "---------RESULTS---------"
+        Write-Verbose $results
+        Write-Verbose "---------RESULTS---------"
 
-        Invoke-RestMethod $apiUrl -Method DELETE -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)            
+        if ($results.count -gt 0) 
+        {
+            $results.value
+        }
     }
     END { }
 }

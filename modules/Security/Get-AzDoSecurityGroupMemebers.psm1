@@ -39,8 +39,7 @@ function Get-AzDoSecurityGroupMembers()
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ParameterSetName="Name", ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)][Alias("name")]$GroupName,
-        [Guid][parameter(ParameterSetName="ID", ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)][Alias("id")]$GroupId = [Guid]::Empty
+        [string][parameter(ParameterSetName="Name", ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)][Alias("name")]$GroupName
     )
     BEGIN
     {
@@ -71,12 +70,7 @@ function Get-AzDoSecurityGroupMembers()
     PROCESS
     {
         $groups = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection
-
-        if ($GroupId -ne [Guid]::Empty) {
-            $group = $groups | ? { $_.id -eq $GroupId }
-        } else {
-            $group = $groups | ? { $_.displayName -eq $GroupName -or $_.principalName -eq $GroupName} 
-        }
+        $group = $groups | ? { $_.displayName -clike $GroupName -or $_.principalName -clike $GroupName} 
 
         if ($null -eq $group) { Write-Error -ErrorAction $errorPreference -Message "Specified group not found" }
 

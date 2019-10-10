@@ -73,11 +73,11 @@ function Add-AzDoSecurityGroupMember()
         $apiParams = @()
 
         $groups = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection 
-        $g = $groups | ? { $_.displayName -clike $GroupName }
+        $g = $groups | ? { $_.displayName -clike $GroupName -or $_.principalName -clike $GroupName} 
         if ($null -eq $g) { Write-Error -ErrorAction $errorPreference -Message "Failed to find requested Group: $($GroupName)" }
 
         $m = Get-AzDoUsers -AzDoConnection $AzDoConnection | ? { $_.displayName -clike $MemberName }
-        if ($null -eq $m) { $m =  $groups | ? { $_.displayName -clike $MemberName } } 
+        if ($null -eq $m) { $m =  $groups | ? { $_.displayName -clike $MemberName -or $_.principalName -clike $MemberName } } 
         if ($null -eq $m) { Write-Error -ErrorAction $errorPreference -Message "Specified Meber could not be found: $($MemberName)" }
 
         #$apiParams += "scopeDescriptor=$($AzDoConnection.ProjectDescriptor)"
