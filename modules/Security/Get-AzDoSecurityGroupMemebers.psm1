@@ -70,7 +70,7 @@ function Get-AzDoSecurityGroupMembers()
     PROCESS
     {
         $groups = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection
-        $group = $groups | ? { $_.displayName -clike $GroupName -or $_.principalName -clike $GroupName} 
+        $group = $groups | ? { $_.displayName -like $GroupName -or $_.principalName -like $GroupName} 
 
         if ($null -eq $group) { Write-Error -ErrorAction $errorPreference -Message "Specified group not found" }
 
@@ -93,7 +93,7 @@ function Get-AzDoSecurityGroupMembers()
             {
                 Write-Verbose "Group Member: $($member.memberDescriptor)"
 
-                if ($member.memberDescriptor -clike "vssgp.*")
+                if ($member.memberDescriptor -like "vssgp.*")
                 {
                     $g = $groups | ? { $_.displayName -eq $GroupName }
 
@@ -101,7 +101,7 @@ function Get-AzDoSecurityGroupMembers()
 
                     $g
                 }
-                elseif ($member.memberDescriptor -clike "aad.*")
+                elseif ($member.memberDescriptor -like "aad.*")
                 {
                     $u = Get-AzDoUserDetails -UserDescriptor $($member.memberDescriptor)
 

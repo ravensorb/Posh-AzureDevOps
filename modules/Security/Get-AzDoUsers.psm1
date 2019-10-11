@@ -1,7 +1,7 @@
 <#
 
 .SYNOPSIS
-This command provides retrieve Users from Azure DevOps
+This command retrieve Users from Azure DevOps
 
 .DESCRIPTION
 The command will retrieve Azure DevOps users (if they exists) 

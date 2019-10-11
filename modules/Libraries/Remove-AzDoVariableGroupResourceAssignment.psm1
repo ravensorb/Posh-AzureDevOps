@@ -77,7 +77,7 @@ function Remove-AzDoVariableGroupResourceAssignment()
             Write-Error -ErrorAction $errorPreference -Message "Specify either Variable Group Name or Variable Group Id"
         }
 
-        $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -clike $VariableGroupName -or $_.id -eq $VariableGroupId }
+        $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -like $VariableGroupName -or $_.id -eq $VariableGroupId }
 
         if ($variableGroup -eq $null)
         {

@@ -70,7 +70,7 @@ function Remove-AzDoSecurityGroup()
     PROCESS
     {
         $groups = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection
-        $group = $groups | ? { $_.displayName -clike $GroupName -or $_.principalName -clike $GroupName} 
+        $group = $groups | ? { $_.displayName -like $GroupName -or $_.principalName -like $GroupName} 
 
         if (-Not $group)
         {

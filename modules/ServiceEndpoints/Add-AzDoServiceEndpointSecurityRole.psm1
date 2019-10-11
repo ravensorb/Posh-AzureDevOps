@@ -78,7 +78,7 @@ function Add-AzDoServiceEndpointSecurityRole()
     {
         $apiParams = @()
 
-        $serviceEndpoint = Get-AzDoServiceEndpoints -AzDoConnection $AzDoConnection | ? { $_.id -eq $EndpointId -or $_.name -clike $EndpointName} 
+        $serviceEndpoint = Get-AzDoServiceEndpoints -AzDoConnection $AzDoConnection | ? { $_.id -eq $EndpointId -or $_.name -like $EndpointName} 
         $serviceEndpoint = @{}
         $serviceEndpoint.id = [Guid]::Parse("3f987c30-261f-4e27-878a-3d929faf109d")
 
@@ -89,19 +89,14 @@ function Add-AzDoServiceEndpointSecurityRole()
             return
         }
 
-        $member = Get-AzDoUsers -AzDoConnection $AzDoConnection | ? { $_.displayName -clike $MemberName -or $_.principalName -clike $MemberName -or $_.mailaddress -clike $MemberName }
-        if ($null -eq $member) 
-        {
-            $member = Get-AzDoTeams -AzDoConnection $AzDoConnection | ? { $_.displayName -clike $MemberName }
-            if ($null -eq $member)
-            {
-                $member = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection | ? { $_.displayName -clike $MemberName }
-            }
-        }
+        $m = Get-AzDoUserEntitlements -AzDoConnection $AzDoConnection | ? { $_.user.displayName -like $MemberName -or $_.user.principalName -like $MemberName -or $_.user.mailAddress -like $MemberName }
+        if ($null -eq $m) { $m =  Get-AzDoTeams -AzDoConnection $AzDoConnection | ? { $_.name -like $MemberName } } 
+        if ($null -eq $m) { $m =  Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection | ? { $_.displayName -like $MemberName -or $_.principalName -like $MemberName } } 
+        if ($null -eq $m) { Write-Error -ErrorAction $errorPreference -Message "Specified Member could not be found: $($MemberName)" }
 
-        if ($null -eq $member)
+        if ($null -eq $m)
         {
-            Write-Error -Message "Unable to locate specifed member."
+            Write-Error -Message "Unable to locate specifed member: $($MemberName)."
             return
         }
 
@@ -114,18 +109,18 @@ function Add-AzDoServiceEndpointSecurityRole()
         }
 
         Write-Verbose "Service Endpoint: $($serviceEndpoint)"
-        Write-Verbose "Member: $($member)"
+        Write-Verbose "Member: $($m)"
         Write-Verbose "Role: $($role)"
 
         #3f987c30-261f-4e27-878a-3d929faf109d
         # PUT https://dev.azure.com/{orgName}/_apis/securityroles/scopes/distributedtask.serviceendpointrole/roleassignments/resources/{resourceEndpointId}?api-version=5.0-preview.1
         $apiUrl = Get-AzDoApiUrl -RootPath $AzDoConnection.OrganizationUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/securityroles/scopes/distributedtask.serviceendpointrole/roleassignments/resources/$($serviceEndpoint.id)" -QueryStringParams $apiParams
 
-        $body = "[{'roleName': '$($role.name)', 'userId': '$($member.originid)'}]"
+        $body = "[{'roleName': '$($role.name)', 'userId': '$($m.id)'}]"
 
-        Write-Host $apiUrl
-        Write-Host $body
-        $result = Invoke-RestMethod $apiUrl -Method PUT -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+        #Write-Host $apiUrl
+        #Write-Host $body
+        $result = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
         
         if ($null -ne $result)
         {
@@ -133,7 +128,7 @@ function Add-AzDoServiceEndpointSecurityRole()
             Write-Verbose $result 
             Write-Verbose "---------RESULT---------"
 
-            #$result
+            $result.value
         }
         else 
         {

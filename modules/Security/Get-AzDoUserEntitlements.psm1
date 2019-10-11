@@ -12,11 +12,8 @@ A valid AzDoConnection object
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
-.PARAMETER SubjectName
-The name of the the user to retreive
-
 .EXAMPLE
-Get-AzDoSubjectLookup -Subject
+Get-AzDoUserEntitlements
 
 .NOTES
 
@@ -24,7 +21,7 @@ Get-AzDoSubjectLookup -Subject
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoSujectLookup()
+function Get-AzDoUserEntitlements()
 {
     [CmdletBinding(
         DefaultParameterSetName="Id"
@@ -33,10 +30,9 @@ function Get-AzDoSujectLookup()
     (
         # Common Parameters
         [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [string]$ApiVersion = $global:AzDoApiVersion
 
         # Module Parameters
-        [string][parameter(ParameterSetName="Id")][Alias("id")]$Subject
     )
     BEGIN
     {
@@ -50,8 +46,8 @@ function Get-AzDoSujectLookup()
             $errorPreference = $PSBoundParameters['ErrorAction']
         }
 
-        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.1-preview.1" }
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.1-preview.1"}
+        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.1-preview.2" }
+        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.1-preview.2"}
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
@@ -68,22 +64,20 @@ function Get-AzDoSujectLookup()
     {
         $apiParams = @()
 
-        # https://vssps.dev.azure.com/{organization}/_apis/graph/subjectlookup?api-version=5.1-preview.1 
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.VsspUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/graph/subjectlookup" -QueryStringParams $apiParams
+        # GET https://vsaex.dev.azure.com/{organization}/_apis/userentitlements?api-version=5.1-preview.2
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.VsaexUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/userentitlements" -QueryStringParams $apiParams
+        #$tmpUrl = "https://vsaex.dev.azure.com/$($AzDoConnection.OrganizationName)/"
+        #$apiUrl = Get-AzDoApiUrl -RootPath $tmpUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/userentitlements" -QueryStringParams $apiParams
 
-        $body = "{ 'lookupKeys': [{ 'descriptor': '$($Subject)'}]}" 
-
-        $results = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Headers $AzDoConnection.HttpHeaders
+        $users = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
-        Write-Verbose "---------RESULTS---------"
-        Write-Verbose $results
-        Write-Verbose "---------RESULTS---------"
+        Write-Verbose "---------USERS---------"
+        Write-Verbose $users
+        Write-Verbose "---------USERS---------"
 
-        if ($null -ne $results)
+        if ($null -ne $users)
         {
-            $results.value.PSObject.Properties | foreach-object {
-                $_.value
-            }
+            return $users.members
         }
     }
     END { }

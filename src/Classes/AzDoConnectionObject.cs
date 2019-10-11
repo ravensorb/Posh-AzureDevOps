@@ -20,6 +20,7 @@ namespace PoshAzDo
 		public string ProjectDescriptor {get;set;}
 		public string ReleaseManagementUrl => string.Format("https://vsrm.dev.azure.com/{0}/{1}", OrganizationName, ProjectName);
 		public string VsspUrl => string.Format("https://vssps.dev.azure.com/{0}", OrganizationName);
+		public string VsaexUrl => string.Format("https://vsaex.dev.azure.com/{0}", OrganizationName);
 		public string PAT {get;set;}
 		public Dictionary<string, string> HttpHeaders {get;set;} = new Dictionary<string, string>();
 		public DateTime CreatedOn {get;set;} = DateTime.Now;
