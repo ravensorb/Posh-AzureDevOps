@@ -55,7 +55,7 @@ function Get-AzDoProjects()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
+            if ($null -eq $AzDoConnection) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -80,7 +80,7 @@ function Get-AzDoProjects()
         Write-Verbose $projects
         Write-Verbose "---------PROJECTS---------"
 
-        if ($projects.count -ne $null)
+        if ($null -ne $projects.count)
         {   
             if (-Not [string]::IsNullOrEmpty($ProjectName))
             {

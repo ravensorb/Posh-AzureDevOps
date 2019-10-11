@@ -86,8 +86,10 @@ function Add-AzDoSecurityGroupMember()
         # PUT https://vssps.dev.azure.com/{orgName}/_apis/graph/Memberships/{subjectDescriptor}/{groupDescriptor}?api-version=5.0-preview.1
         $apiUrl = Get-AzDoApiUrl -RootPath $AzDoConnection.VsspUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/graph/Memberships/$($m.descriptor)/$($g.descriptor)" -QueryStringParams $apiParams
 
+        
+
         #Write-Host $apiUrl
-        $result = Invoke-RestMethod $apiUrl -Method PUT -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+        $result = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
         
         Write-Verbose "---------RESULT---------"
         Write-Verbose $result 

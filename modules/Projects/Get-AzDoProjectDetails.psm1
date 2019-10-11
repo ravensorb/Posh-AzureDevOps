@@ -60,7 +60,7 @@ function Get-AzDoProjectDetails()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
+            if ($null -eq $AzDoConnection) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         if ([string]::IsNullOrEmpty($ProjectName) -and $ProjectId -eq $null) { Write-Error -ErrorAction $errorPreference -Message "Project Name or ID required" }

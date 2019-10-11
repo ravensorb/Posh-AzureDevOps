@@ -103,7 +103,7 @@ function Get-AzDoSecurityGroupMembers()
                 }
                 elseif ($member.memberDescriptor -like "aad.*")
                 {
-                    $u = Get-AzDoUserDetails -UserDescriptor $($member.memberDescriptor)
+                    $u = Get-AzDoUserDetails -AzDoConnection $AzDoConnection -UserDescriptor $($member.memberDescriptor)
 
                     Write-Verbose "`tUser: $($u.displayName)"
 

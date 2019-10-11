@@ -63,7 +63,7 @@ function Remove-AzDoVariableGroupResourceAssignment()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
+            if ($null -eq $AzDoConnection) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -79,14 +79,14 @@ function Remove-AzDoVariableGroupResourceAssignment()
 
         $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -like $VariableGroupName -or $_.id -eq $VariableGroupId }
 
-        if ($variableGroup -eq $null)
+        if ($null -eq $variableGroup)
         {
             Write-Error -ErrorAction $errorPreference -Message "Variable Group '[$($VariableGroupId)]:$($VariableGroupName)' not found"
         }
 
         $resourceAssignments = Get-AzDoVariableGroupResourceAssignments -VariableGroupName $($variableGroup.name) | ? {$_.access -eq "assigned" -and ($_.identity.displayName -eq $UserOrGroupName -or $_.identity.principalName -eq $UserOrGroupName) } 
 
-        if ($resourceAssignments -eq $null -or $resourceAssignments.length -eq 0)
+        if ($null -eq $resourceAssignments -or $resourceAssignments.length -eq 0)
         {
             Write-Error -ErrorAction $errorPreference -Message "User/Group '$($UserOrGroupName)' not found"
         }
@@ -112,11 +112,11 @@ function Remove-AzDoVariableGroupResourceAssignment()
         # [{"roleName":"<role>","userId":",<UserGUID>"}]
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/$($AzDoConnection.ProjectId)`$$($variableGroup.Id)"
 
-        $respomse = Invoke-RestMethod $apiUrl -Method PATCH -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)  
+        $response = Invoke-RestMethod $apiUrl -Method PATCH -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)  
 
         Write-Verbose "Response: $($response.id)"
 
-        #$respomse
+        #$response
     }
     END 
     { 

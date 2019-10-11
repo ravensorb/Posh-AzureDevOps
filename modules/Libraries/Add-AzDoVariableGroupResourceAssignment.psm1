@@ -58,7 +58,7 @@ function Add-AzDoVariableGroupResourceAssignment()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
+            if ($null -eq $AzDoConnection) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -75,19 +75,19 @@ function Add-AzDoVariableGroupResourceAssignment()
 
         $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -like $VariableGroupName -or $_.id -eq $VariableGroupId }
 
-        if ($variableGroup -eq $null)
+        if ($null -eq $variableGroup)
         {
             Write-Error -ErrorAction $errorPreference -Message "Variable Group '[$($VariableGroupId)]:$($VariableGroupName)' not found"
         }
 
         $userOrGroup = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection | ? { $_.displayName -eq $UserOrGroupName -or $_.principalName -eq $UserOrGroupName}
-        if ($userOrGroup -eq $null)
+        if ($null -eq $userOrGroup)
         {
             Write-Verbose "Group not found, looking for user"
             $userOrGroup = Get-AzDoUsers -AzDoConnection $AzDoConnection | ? { $_.displayName -eq $UserOrGroupName -or $_.principalName -eq $UserOrGroupName}
         }
 
-        if ($userOrGroup -eq $null)
+        if ($null -eq $userOrGroup)
         {
             Write-Error -ErrorAction $errorPreference -Message "User/Group not found"
         }

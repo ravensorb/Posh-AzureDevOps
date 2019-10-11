@@ -56,7 +56,7 @@ function Set-AzDoVariableGroupPermissionInheritance()
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
-            if ($AzDoConnection -eq $null) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
+            if ($null -eq $AzDoConnection) { Write-Error -ErrorAction $errorPreference -Message "AzDoConnection or ProjectUrl must be valid" }
         }
 
         Write-Verbose "Entering script $($MyInvocation.MyCommand.Name)"
@@ -73,7 +73,7 @@ function Set-AzDoVariableGroupPermissionInheritance()
 
         $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -eq $VariableGroupName -or $_.id -eq $VariableGroupId }
 
-        if ($variableGroup -eq $null)
+        if ($null -eq $variableGroup)
         {
             Write-Error -ErrorAction $errorPreference -Message "Variable Group could not be found"
         }
