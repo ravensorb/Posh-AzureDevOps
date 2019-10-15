@@ -80,16 +80,11 @@ function Add-AzDoVariableGroupResourceAssignment()
             Write-Error -ErrorAction $errorPreference -Message "Variable Group '[$($VariableGroupId)]:$($VariableGroupName)' not found"
         }
 
-        $userOrGroup = Get-AzDoSecurityGroups -AzDoConnection $AzDoConnection | ? { $_.displayName -eq $UserOrGroupName -or $_.principalName -eq $UserOrGroupName}
-        if ($null -eq $userOrGroup)
-        {
-            Write-Verbose "Group not found, looking for user"
-            $userOrGroup = Get-AzDoUsers -AzDoConnection $AzDoConnection | ? { $_.displayName -eq $UserOrGroupName -or $_.principalName -eq $UserOrGroupName}
-        }
+        $userOrGroup = Get-AzDoIdentities -AzDoConnection $AzDoConnection -QueryString $UserOrGroupName
 
         if ($null -eq $userOrGroup)
         {
-            Write-Error -ErrorAction $errorPreference -Message "User/Group not found"
+            Write-Error -ErrorAction $errorPreference -Message "User/Group/Team not found"
         }
 
         # PUT https://<acct>.visualstudio.com/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/<projID>$<VarGroupID>?api-version=5.0-preview.1
@@ -106,7 +101,7 @@ function Add-AzDoVariableGroupResourceAssignment()
         Write-Verbose "---------BODY---------"
 
         # {"count":1,"value":[{"identity":{"displayName":"[3Pager]\\Variable Groups Managers - AWS","id":"e208eaf7-5b55-40a9-8898-0d43ade92799","uniqueName":"[3Pager]\\Variable Groups Managers - AWS"},"role":{"displayName":"User","name":"User","allowPermissions":17,"denyPermissions":0,"identifier":"distributedtask.variablegroup.User","description":"User can use, but cannot manage the library items.","scope":"distributedtask.variablegroup"},"access":"assigned","accessDisplayName":"Assigned"}]}
-        $respomse = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
+        $response = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
         
         Write-Verbose "Response: $($response.id)"
 
