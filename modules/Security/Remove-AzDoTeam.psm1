@@ -30,7 +30,8 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function Remove-AzDoTeam()
 {
     [CmdletBinding(
-        DefaultParameterSetName="Name"
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -84,12 +85,22 @@ function Remove-AzDoTeam()
 
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams/$($team.Id)" -QueryStringParams $apiParams
 
-        Invoke-RestMethod $apiUrl -Method DELETE -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)     
+        if (-Not $WhatIfPreference)
+        {
+            $result = Invoke-RestMethod $apiUrl -Method DELETE -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)     
+        }
         
+        Write-Verbose "---------RESULT---------"
+        Write-Verbose ($result | ConvertTo-Json -Depth 50 | Out-String)
+        Write-Verbose "---------RESULT---------"
+
         Write-Verbose "Removed $($team.displayName)"
 
         $true
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

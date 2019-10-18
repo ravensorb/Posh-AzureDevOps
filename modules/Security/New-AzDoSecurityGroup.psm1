@@ -30,7 +30,8 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function New-AzDoSecurityGroup()
 {
     [CmdletBinding(
-        DefaultParameterSetName="Name"
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -85,9 +86,14 @@ function New-AzDoSecurityGroup()
         $groupDetails = @{displayName=$GroupName;description=$GroupDescription}
         $body = $groupDetails | ConvertTo-Json -Depth 10 -Compress
 
+        Write-Verbose "---------BODY---------"
         Write-Verbose $body
+        Write-Verbose "---------BODY---------"
 
-        $group = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+        if (-Not $WhatIfPreference)
+        {
+            $group = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+        }
         
         Write-Verbose "---------GROUP---------"
         Write-Verbose ($group| ConvertTo-Json -Depth 50 | Out-String)
@@ -95,6 +101,9 @@ function New-AzDoSecurityGroup()
 
         $group
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

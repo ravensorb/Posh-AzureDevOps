@@ -13,7 +13,7 @@ The name of the variable group to retrieve
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoVariableGroups
+Get-AzDoresponse
 
 .NOTES
 
@@ -21,7 +21,7 @@ Get-AzDoVariableGroups
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoVariableGroups()
+function Get-AzDoresponse()
 {
     [CmdletBinding(
         DefaultParameterSetName="Name"
@@ -63,15 +63,18 @@ function Get-AzDoVariableGroups()
     }
     PROCESS
     {
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups"
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/response"
 
-        $variableGroups = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
+        $response = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
-        Write-Verbose "---------Varaible Groups---------"
-        Write-Verbose ($variableGroups| ConvertTo-Json -Depth 50 | Out-String)
-        Write-Verbose "---------Varaible Groups---------"
+        if ($null -ne $response)
+        {
+            Write-Verbose "---------Varaible Groups---------"
+            Write-Verbose ($response| ConvertTo-Json -Depth 50 | Out-String)
+            Write-Verbose "---------Varaible Groups---------"
 
-        $variableGroups.value    
+            $response.value    
+        }
     }
     END 
     { 

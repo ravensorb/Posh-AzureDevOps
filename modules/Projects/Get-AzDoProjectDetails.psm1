@@ -88,6 +88,9 @@ function Get-AzDoProjectDetails()
 
         return $projectDetails
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

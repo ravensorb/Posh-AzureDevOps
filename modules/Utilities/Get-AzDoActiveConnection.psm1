@@ -35,8 +35,8 @@ function Get-AzDoActiveConnection()
         
         $global:AzDoActiveConnection
     }
-    END
-    {
-
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
     }
 }

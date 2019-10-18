@@ -132,18 +132,28 @@ function Add-AzDoBuildPipelineVariable()
             }
         }
 
-    }
-    END
-    {
         #$definition.source = "restApi"
 
         $body = $definition | ConvertTo-Json -Depth 10 -Compress
 
-        $response = Invoke-RestMethod $apiUrl -Method Put -Body $body -ContentType 'application/json' -Headers $AzDoConnection.HttpHeaders
+        Write-Verbose "---------BODY---------"
+        Write-Verbose $body
+        Write-Verbose "---------BODY---------"
 
-        Write-Verbose "Response: $($response.id)"
+        if (-Not $WhatIfPreference)
+        {
+            $response = Invoke-RestMethod $apiUrl -Method Put -Body $body -ContentType 'application/json' -Headers $AzDoConnection.HttpHeaders
+        }
+
+        Write-Verbose "---------RESPONSE---------"
+        Write-Verbose ($response | ConvertTo-Json -Depth 50 | Out-String)
+        Write-Verbose "---------RESPONSE---------"
 
         $response
+    }
+    END
+    {
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
     }
 }
 

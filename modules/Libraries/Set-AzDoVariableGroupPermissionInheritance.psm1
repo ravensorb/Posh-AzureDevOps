@@ -24,7 +24,8 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function Set-AzDoVariableGroupPermissionInheritance()
 {
     [CmdletBinding(
-        DefaultParameterSetName="Name"
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -85,9 +86,14 @@ function Set-AzDoVariableGroupPermissionInheritance()
 
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/$($AzDoConnection.ProjectId)`$$($variableGroup.Id)" -QueryStringParams $apiParams
 
-        $response = Invoke-RestMethod -Method PATCH -Uri $apiUrl -Headers $AzDoConnection.HttpHeaders
+        if (-Not $WhatIfPreference) 
+        {
+            $response = Invoke-RestMethod -Method PATCH -Uri $apiUrl -Headers $AzDoConnection.HttpHeaders
+        }
 
-        Write-Verbose "Response: $($response.id)"
+        Write-Verbose "---------RESPONSE---------"
+        Write-Verbose ($response | ConvertTo-Json -Depth 50 | Out-String)
+        Write-Verbose "---------RESPONSE---------"
 
         #$response
     }

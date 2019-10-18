@@ -48,7 +48,10 @@ https://github.com/ravensorb/Posh-AzureDevOps
 
 function Add-AzDoReleasePipelineVariable()
 {
-    [CmdletBinding()]
+    [CmdletBinding(
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
+    )]
     param
     (
         # Common Parameters
@@ -171,13 +174,24 @@ function Add-AzDoReleasePipelineVariable()
 
         $body = $definition | ConvertTo-Json -Depth 10 -Compress
 
-        $response = Invoke-RestMethod $apiUrl -Method Put -Body $body -ContentType 'application/json' -Headers $AzDoConnection.HttpHeaders 
+        Write-Verbose "---------BODY---------"
+        Write-Verbose $body
+        Write-Verbose "---------BODY---------"
+
+        if (-Not $WhatIfPreference)
+        {
+            $response = Invoke-RestMethod $apiUrl -Method Put -Body $body -ContentType 'application/json' -Headers $AzDoConnection.HttpHeaders 
+        }
+
+        Write-Verbose "---------RESPONSE---------"
+        Write-Verbose ($response | ConvertTo-Json -Depth 50 | Out-String)
+        Write-Verbose "---------RESPONSE---------"
+
+        $response
     }
     END
     {
-        Write-Verbose "Response: $($response.id)"
-
-        $response
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
     }
 }
 

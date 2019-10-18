@@ -114,6 +114,9 @@ function Get-AzDoSecurityGroupMembers()
             }
         }
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

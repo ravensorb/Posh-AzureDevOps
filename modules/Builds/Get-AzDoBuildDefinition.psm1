@@ -94,9 +94,9 @@ function Get-AzDoBuildDefinition()
 
         $buildDefinitions = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
-        Write-Verbose "---------BUILD DEFINITION---------"
+        Write-Verbose "---------BUILD DEFINITIONS---------"
         Write-Verbose ($buildDefinitions| ConvertTo-Json -Depth 50 | Out-String)
-        Write-Verbose "---------BUILD DEFINITION---------"
+        Write-Verbose "---------BUILD DEFINITIONS---------"
 
         if ($null -ne $buildDefinitions.count)
         {   
@@ -108,9 +108,13 @@ function Get-AzDoBuildDefinition()
                         Write-Verbose "Release Defintion Found $($bd.name) found."
 
                         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/build/definitions/$($bd.id)" -QueryStringParams $apiParams
-                        $buildDefinitions = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
+                        $buildDefinition = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 
-                        return $buildDefinitions
+                        Write-Verbose "---------BUILD DEFINITION---------"
+                        Write-Verbose ($buildDefinitions| ConvertTo-Json -Depth 50 | Out-String)
+                        Write-Verbose "---------BUILD DEFINITION---------"
+                
+                        return $buildDefinition
                     }                     
                 }
             }
@@ -130,6 +134,9 @@ function Get-AzDoBuildDefinition()
         
         return $null
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

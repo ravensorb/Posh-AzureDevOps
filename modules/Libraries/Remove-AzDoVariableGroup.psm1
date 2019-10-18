@@ -23,7 +23,9 @@ https://github.com/ravensorb/Posh-AzureDevOps
 #>
 function Remove-AzDoVariableGroup()
 {
-    [CmdletBinding()]
+    [CmdletBinding(
+        SupportsShouldProcess=$True
+    )]
     param
     (
         # Common Parameters
@@ -80,10 +82,14 @@ function Remove-AzDoVariableGroup()
         # DELETE https://dev.azure.com/{organization}/{project}/_apis/distributedtask/variablegroups/{groupId}?api-version=5.0-preview.1
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups/$($variableGroup.id)"
 
-        #Write-Verbose $body
-        $response = Invoke-RestMethod $apiUrl -Method $method -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
-
-        Write-Verbose "Response: $($response.id)"
+        if (-Not $WhatIfPreference) 
+        {
+            $response = Invoke-RestMethod $apiUrl -Method $method -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+        }
+        
+        Write-Verbose "---------RESPONSE---------"
+        Write-Verbose ($response | ConvertTo-Json -Depth 50 | Out-String)
+        Write-Verbose "---------RESPONSE---------"
 
         #$response
     }

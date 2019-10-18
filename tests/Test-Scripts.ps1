@@ -129,7 +129,7 @@ PROCESS
     Write-Host "Testing Repo API Calls" -ForegroundColor Green
     ##################################################################################################################
     Write-Host "`tGet Repo Branches: " -NoNewline
-    $repoTestResult = Get-AzDoRepoBranches -AzDoConnection $AzDoConnection -ApiVersion $ApiVersion -Name $RepoName
+    $repoTestResult = Get-AzDoGitRepoBranches -AzDoConnection $AzDoConnection -ApiVersion $ApiVersion -Name $RepoName
     if ($repoTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
 
     ##################################################################################################################
@@ -153,4 +153,7 @@ PROCESS
     if ($securityGroupsTestResult -ne $null) { Write-Host "`tSuccess" -ForegroundColor Green } else { Write-Host "`tFailed" -ForegroundColor Red }
     
 }
-END { }
+END 
+{ 
+    Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+}

@@ -101,7 +101,10 @@ function Get-AzDoIdentities()
 
         Write-Verbose $body
 
-        $results = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Headers $AzDoConnection.HttpHeaders
+        if (-Not $WhatIfPreference)
+        {
+            $results = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Headers $AzDoConnection.HttpHeaders
+        }
         
         Write-Verbose "---------RESULTS---------"
         Write-Verbose ($results| ConvertTo-Json -Depth 50 | Out-String)
@@ -113,7 +116,10 @@ function Get-AzDoIdentities()
         }
 
         Write-Verbose "No identities found"
-}
-    END { }
+    }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

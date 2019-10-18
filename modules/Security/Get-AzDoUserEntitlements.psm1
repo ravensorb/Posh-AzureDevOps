@@ -80,6 +80,9 @@ function Get-AzDoUserEntitlements()
             return $users.members
         }
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

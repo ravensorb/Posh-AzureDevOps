@@ -13,7 +13,7 @@ The name of the variable group to retrieve
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoVariableGroupResourceAssignments -VariableGroupName <variable group name>
+Get-AzDoresponse -VariableGroupName <variable group name>
 
 .NOTES
 
@@ -21,7 +21,7 @@ Get-AzDoVariableGroupResourceAssignments -VariableGroupName <variable group name
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoVariableGroupResourceAssignments()
+function Get-AzDoresponse()
 {
     [CmdletBinding(
         DefaultParameterSetName="Name"
@@ -81,15 +81,15 @@ function Get-AzDoVariableGroupResourceAssignments()
         # https://dev.azure.com/3pager/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/5d4ef62e-538a-42e9-a02e-e25bce16abee%245
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/$($AzDoConnection.ProjectId)`$$($variableGroup.Id)"
 
-        $variableGroupResourceAssignments = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders 
+        $response = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders 
 
-        if ($null -ne $variableGroupResourceAssignments)
+        if ($null -ne $response)
         {
             Write-Verbose "---------Resource Assignments---------"
-            Write-Verbose ($variableGroupResourceAssignments| ConvertTo-Json -Depth 50 | Out-String)
+            Write-Verbose ($response| ConvertTo-Json -Depth 50 | Out-String)
             Write-Verbose "---------Resource Assignments---------"
 
-            $variableGroupResourceAssignments.value
+            $response.value
         }
     }
     END 

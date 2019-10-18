@@ -34,7 +34,8 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function Remove-AzDoReleasePipelineVariable()
 {
     [CmdletBinding(
-        DefaultParameterSetName='Name'
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -107,14 +108,23 @@ function Remove-AzDoReleasePipelineVariable()
         #Write-Verbose "Persist definition $definition."
         $body = $definition | ConvertTo-Json -Depth 10 -Compress
 
-        #Write-Verbose $body
-        $response = Invoke-RestMethod $apiUrl -Method Put -Body $body -ContentType 'application/json' -Headers $AzDoConnection.HttpHeaders | Out-Null        
+        Write-Verbose "---------BODY---------"
+        Write-Verbose $body
+        Write-Verbose "---------BODY---------"
+
+        if (-Not $WhatIfPreference)
+        {
+            $response = Invoke-RestMethod $apiUrl -Method Put -Body $body -ContentType 'application/json' -Headers $AzDoConnection.HttpHeaders | Out-Null        
+        }
+
+        Write-Verbose "---------RESPONSE---------"
+        Write-Verbose ($response | ConvertTo-Json -Depth 50 | Out-String)
+        Write-Verbose "---------RESPONSE---------"
     }
     END
     {
-        Write-Verbose "Response: $($response.id)"
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
 
-        #$response
         return $true
     }
 }

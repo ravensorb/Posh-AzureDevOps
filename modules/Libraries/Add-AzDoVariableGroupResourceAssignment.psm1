@@ -24,7 +24,8 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function Add-AzDoVariableGroupResourceAssignment()
 {
     [CmdletBinding(
-        DefaultParameterSetName="Name"
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -103,10 +104,14 @@ function Add-AzDoVariableGroupResourceAssignment()
         Write-Verbose $body
         Write-Verbose "---------BODY---------"
 
-        # {"count":1,"value":[{"identity":{"displayName":"[3Pager]\\Variable Groups Managers - AWS","id":"e208eaf7-5b55-40a9-8898-0d43ade92799","uniqueName":"[3Pager]\\Variable Groups Managers - AWS"},"role":{"displayName":"User","name":"User","allowPermissions":17,"denyPermissions":0,"identifier":"distributedtask.variablegroup.User","description":"User can use, but cannot manage the library items.","scope":"distributedtask.variablegroup"},"access":"assigned","accessDisplayName":"Assigned"}]}
-        $response = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
+        if (-Not $WhatIfPreference) 
+        {
+            $response = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
+        }
         
-        Write-Verbose "Response: $($response.id)"
+        Write-Verbose "---------RESPONSE---------"
+        Write-Verbose ($response | ConvertTo-Json -Depth 50 | Out-String)
+        Write-Verbose "---------RESPONSE---------"
 
         $response
     }

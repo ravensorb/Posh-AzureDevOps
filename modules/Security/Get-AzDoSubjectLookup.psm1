@@ -86,6 +86,9 @@ function Get-AzDoSujectLookup()
             }
         }
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

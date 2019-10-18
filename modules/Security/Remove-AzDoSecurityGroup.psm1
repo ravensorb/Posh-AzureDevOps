@@ -30,7 +30,8 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function Remove-AzDoSecurityGroup()
 {
     [CmdletBinding(
-        DefaultParameterSetName="Name"
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -83,8 +84,18 @@ function Remove-AzDoSecurityGroup()
 
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.VsspUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/graph/groups/$($group.descriptor)" -QueryStringParams $apiParams
 
-        Invoke-RestMethod $apiUrl -Method DELETE -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)            
+        if (-Not $WhatIfPreference)
+        {
+            $response =  Invoke-RestMethod $apiUrl -Method DELETE -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)            
+        }
+
+        Write-Verbose "---------RESPONSE---------"
+        Write-Verbose ($response| ConvertTo-Json -Depth 50 | Out-String)
+        Write-Verbose "---------RESPONSE---------"
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

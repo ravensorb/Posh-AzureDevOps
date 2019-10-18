@@ -33,7 +33,8 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function Add-AzDoServiceEndpointSecurityRole()
 {
     [CmdletBinding(
-        DefaultParameterSetName="Name"
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -118,9 +119,15 @@ function Add-AzDoServiceEndpointSecurityRole()
 
         $body = "[{'roleName': '$($role.name)', 'userId': '$($m.id)'}]"
 
+        Write-Verbose "---------BODY---------"
+        Write-Verbose $body
+        Write-Verbose "---------BODY---------"
         #Write-Host $apiUrl
-        #Write-Host $body
-        $result = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+
+        if (-Not $WhatIfPreference)
+        {
+            $result = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+        }
         
         if ($null -ne $result)
         {
@@ -135,6 +142,9 @@ function Add-AzDoServiceEndpointSecurityRole()
             Write-Verbose "No results found"
         }
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

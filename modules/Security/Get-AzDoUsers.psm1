@@ -118,7 +118,10 @@ function Get-AzDoUsers()
         Write-Verbose "No Users found."
 
         return $null
-}
-    END { }
+    }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

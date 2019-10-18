@@ -24,7 +24,8 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function Remove-AzDoLibrarySecurityRole()
 {
     [CmdletBinding(
-        DefaultParameterSetName="Name"
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -85,11 +86,14 @@ function Remove-AzDoLibrarySecurityRole()
         Write-Verbose $body
         Write-Verbose "---------BODY---------"
 
-        if (-Not $WhatIfPreference) {
+        if (-Not $WhatIfPreference) 
+        {
             $response = Invoke-RestMethod $apiUrl -Method PATCH -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
         }
         
-        Write-Verbose "Response: $($response.id)"
+        Write-Verbose "---------RESPONSE---------"
+        Write-Verbose ($response | ConvertTo-Json -Depth 50 | Out-String)
+        Write-Verbose "---------RESPONSE---------"
 
         $response
     }

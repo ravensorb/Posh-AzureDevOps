@@ -30,7 +30,8 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function New-AzDoTeam()
 {
     [CmdletBinding(
-        DefaultParameterSetName="Name"
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -79,9 +80,14 @@ function New-AzDoTeam()
         $teamDetails = @{name=$TeamName; description=$TeamDescription}
         $body = $teamDetails | ConvertTo-Json -Depth 10 -Compress
 
+        Write-Verbose "---------BODY---------"
         Write-Verbose $body
+        Write-Verbose "---------BODY---------"
 
-        $team = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+        if (-Not $WhatIfPreference)
+        {
+            $team = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+        }
         
         Write-Verbose "---------TEAM---------"
         Write-Verbose ($team| ConvertTo-Json -Depth 50 | Out-String)
@@ -89,6 +95,9 @@ function New-AzDoTeam()
 
         $team
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.0.7'
+ModuleVersion = '1.0.8'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -96,7 +96,10 @@ NestedModules = @(
     '.\modules\Releases\Get-AzDoReleasePipelineVariables.psm1',
     '.\modules\Releases\Get-AzDoReleaseWorkItems.psm1',
     '.\modules\Releases\Remove-AzDoReleasePipelineVariable.psm1',
-    '.\modules\Repos\Get-AzDoRepoBranches.psm1',
+    '.\modules\Repos\Add-AzDoGitRepo.psm1',
+    '.\modules\Repos\Get-AzDoGitRepos.psm1',
+    '.\modules\Repos\Get-AzDoGitRepoBranches.psm1',
+    '.\modules\Repos\Remove-AzDoGitRepo.psm1',
     '.\modules\Security\Add-AzDoSecurityGroupMember.psm1',
     '.\modules\Security\Get-AzDoIdentities.psm1',
     '.\modules\Security\Get-AzDoSecurityGroupMemebers.psm1',
@@ -150,7 +153,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-         Tags = @( "azure devops", "azdo", "vsts" )
+         Tags = @( "devops", "azdo", "vsts" )
 
         # A URL to the license for this module.
         LicenseUri = 'https://github.com/ravensorb/Posh-AzureDevOps'

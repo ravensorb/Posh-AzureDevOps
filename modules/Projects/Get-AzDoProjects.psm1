@@ -105,6 +105,9 @@ function Get-AzDoProjects()
         
         return $null
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

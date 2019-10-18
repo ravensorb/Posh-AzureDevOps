@@ -89,6 +89,10 @@ function Get-AzDoBuildWorkItems()
 
             $witDetails = Invoke-RestMethod $wit.url -Headers $AzDoConnection.HttpHeaders | Select-Object -ExpandProperty fields
 
+            Write-Verbose "---------WORK ITEM---------"
+            Write-Verbose ($witDetails| ConvertTo-Json -Depth 50 | Out-String)
+            Write-Verbose "---------WORK ITEM---------"
+    
             $witCustom = [pscustomobject]@{
                 Id = $wit.id;
                 Url = $wit.url;
@@ -99,6 +103,9 @@ function Get-AzDoBuildWorkItems()
         }
 
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

@@ -45,6 +45,9 @@ function Get-AzDoApiUrl()
 
         return $apiUrl
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

@@ -41,7 +41,9 @@ https://github.com/ravensorb/Posh-AzureDevOps
 #>
 function Add-AzDoVariableGroupVariable()
 {
-    [CmdletBinding()]
+    [CmdletBinding(
+        SupportsShouldProcess=$True
+    )]
     param
     (
         # Common Parameters
@@ -133,11 +135,19 @@ function Add-AzDoVariableGroupVariable()
 
         #Write-Verbose "Persist variable group $VariableGroupName."
         $body = $variableGroup | ConvertTo-Json -Depth 10 -Compress
+
+        Write-Verbose "---------BODY---------"
+        Write-Verbose $body
+        Write-Verbose "---------BODY---------"
+
+        if (-Not $WhatIfPreference) 
+        {
+            $response = Invoke-RestMethod $apiUrl -Method $method -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
+        }
         
-        #Write-Verbose $body
-        $response = Invoke-RestMethod $apiUrl -Method $method -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
-        
-        Write-Verbose "Response: $($response.id)"
+        Write-Verbose "---------RESPONSE---------"
+        Write-Verbose ($response | ConvertTo-Json -Depth 50 | Out-String)
+        Write-Verbose "---------RESPONSE---------"
 
         $response
     }

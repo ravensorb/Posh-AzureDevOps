@@ -104,9 +104,10 @@ function Get-AzDoBuildPipelineVariables()
             return $null
         }
 
-        # Write-Verbose "---------BUILD VARAIBLES---------"
-        # $definition.variables.PSObject.Properties | Write-Verbose
-        # Write-Verbose "---------BUILD VARAIBLES---------"
+        #Write-Verbose "---------VARIABLE---------"
+        #Write-Verbose ($definition.variables| ConvertTo-Json -Depth 50 | Out-String)
+        #$definition.variables.PSObject.Properties | Write-Verbose
+        #Write-Verbose "---------VARIABLES---------"
 
         $variables = @()
 
@@ -121,10 +122,12 @@ function Get-AzDoBuildPipelineVariables()
                 AllowOverride = $_.Value.allowOverride;
             }
         }
+
+        $variables
     }
     END
     {
-        $variables
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
     }
 }
 

@@ -13,7 +13,7 @@ The name of the variable group to retrieve
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoVariableGroupRoleDefinitions -VariableGroupName <variable group name>
+Get-AzDoresponse -VariableGroupName <variable group name>
 
 .NOTES
 
@@ -21,7 +21,7 @@ Get-AzDoVariableGroupRoleDefinitions -VariableGroupName <variable group name>
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoVariableGroupRoleDefinitions()
+function Get-AzDoresponse()
 {
     [CmdletBinding(
         DefaultParameterSetName="Name"
@@ -68,13 +68,16 @@ function Get-AzDoVariableGroupRoleDefinitions()
 
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/securityroles/scopes/distributedtask.variablegroup/roledefinitions"
 
-        $variableGroupRoleDefinitions = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
+        $response = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 
-        Write-Verbose "---------Role Definitions---------"
-        Write-Verbose ($variableGroupRoleDefinitions| ConvertTo-Json -Depth 50 | Out-String)
-        Write-Verbose "---------Role Definitions---------"
+        if ($null -ne $response)
+        {
+            Write-Verbose "---------Role Definitions---------"
+            Write-Verbose ($response | ConvertTo-Json -Depth 50 | Out-String)
+            Write-Verbose "---------Role Definitions---------"
         
-        $variableGroupRoleDefinitions.value
+            $response.value
+        }
     }
     END 
     { 

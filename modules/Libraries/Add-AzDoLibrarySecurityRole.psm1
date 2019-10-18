@@ -27,7 +27,8 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function Add-AzDoLibrarySecurityRole()
 {
     [CmdletBinding(
-        DefaultParameterSetName="Name"
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -89,9 +90,14 @@ function Add-AzDoLibrarySecurityRole()
         Write-Verbose $body
         Write-Verbose "---------BODY---------"
 
-        $response = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
+        if (-Not $WhatIfPreference) 
+        {
+            $response = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
+        }
         
-        Write-Verbose "Response: $($response.id)"
+        Write-Verbose "---------RESPONSE---------"
+        Write-Verbose ($response | ConvertTo-Json -Depth 50 | Out-String)
+        Write-Verbose "---------RESPONSE---------"
 
         $response
     }

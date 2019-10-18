@@ -78,6 +78,9 @@ function Get-AzDoServiceEndpoints()
             $results.value
         }
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 

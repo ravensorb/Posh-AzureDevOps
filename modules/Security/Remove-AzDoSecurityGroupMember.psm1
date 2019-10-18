@@ -30,7 +30,8 @@ https://github.com/ravensorb/Posh-AzureDevOps
 function Remove-AzDoSecurityGroupMember()
 {
     [CmdletBinding(
-        DefaultParameterSetName="Name"
+        DefaultParameterSetName="Name",
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -85,8 +86,10 @@ function Remove-AzDoSecurityGroupMember()
         # PUT https://vssps.dev.azure.com/{orgName}/_apis/graph/Memberships/{subjectDescriptor}/{groupDescriptor}?api-version=5.0-preview.1
         $apiUrl = Get-AzDoApiUrl -RootPath $AzDoConnection.VsspUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/graph/Memberships/$($m.descriptor)/$($g.descriptor)" -QueryStringParams $apiParams
 
-        #Write-Host $apiUrl
-        $result = Invoke-RestMethod $apiUrl -Method DELETE -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+        if (-Not $WhatIfPreference)
+        {
+            $result = Invoke-RestMethod $apiUrl -Method DELETE -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+        }
         
         Write-Verbose "---------RESULT---------"
         Write-Verbose ($result | ConvertTo-Json -Depth 50 | Out-String)
@@ -94,6 +97,9 @@ function Remove-AzDoSecurityGroupMember()
 
         $result
     }
-    END { }
+    END 
+    { 
+        Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"
+    }
 }
 
