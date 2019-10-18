@@ -72,7 +72,7 @@ function Get-AzDoUserEntitlements()
         $users = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------USERS---------"
-        Write-Verbose $users
+        Write-Verbose ($users| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------USERS---------"
 
         if ($null -ne $users)

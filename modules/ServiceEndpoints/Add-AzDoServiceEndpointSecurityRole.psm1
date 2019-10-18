@@ -125,7 +125,7 @@ function Add-AzDoServiceEndpointSecurityRole()
         if ($null -ne $result)
         {
             Write-Verbose "---------RESULT---------"
-            Write-Verbose $result 
+            Write-Verbose ($result| ConvertTo-Json -Depth 50 | Out-String)
             Write-Verbose "---------RESULT---------"
 
             $result.value

@@ -86,7 +86,7 @@ function Get-AzDoVariableGroupResourceAssignments()
         if ($null -ne $variableGroupResourceAssignments)
         {
             Write-Verbose "---------Resource Assignments---------"
-            Write-Verbose $variableGroupResourceAssignments
+            Write-Verbose ($variableGroupResourceAssignments| ConvertTo-Json -Depth 50 | Out-String)
             Write-Verbose "---------Resource Assignments---------"
 
             $variableGroupResourceAssignments.value

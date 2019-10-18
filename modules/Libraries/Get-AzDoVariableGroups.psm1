@@ -68,7 +68,7 @@ function Get-AzDoVariableGroups()
         $variableGroups = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------Varaible Groups---------"
-        Write-Verbose $variableGroups
+        Write-Verbose ($variableGroups| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------Varaible Groups---------"
 
         $variableGroups.value    

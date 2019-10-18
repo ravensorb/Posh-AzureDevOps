@@ -76,7 +76,7 @@ function Get-AzDoSujectLookup()
         $results = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------RESULTS---------"
-        Write-Verbose $results
+        Write-Verbose ($results| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------RESULTS---------"
 
         if ($null -ne $results)

@@ -13,7 +13,7 @@ A valid AzDoConnection object
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoServiceEndpointRoles
+Get-AzDoServiceEndpointSecurityRoles
 
 .NOTES
 
@@ -21,7 +21,7 @@ Get-AzDoServiceEndpointRoles
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoServiceEndpointRoles()
+function Get-AzDoServiceEndpointSecurityRoles()
 {
     [CmdletBinding(
         DefaultParameterSetName="Name"
@@ -70,7 +70,7 @@ function Get-AzDoServiceEndpointRoles()
         $results = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------RESULTS---------"
-        Write-Verbose $results
+        Write-Verbose ($results| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------RESULTS---------"
 
         if ($results.count -gt 0) 

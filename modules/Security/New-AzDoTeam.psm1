@@ -84,7 +84,7 @@ function New-AzDoTeam()
         $team = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
         
         Write-Verbose "---------TEAM---------"
-        Write-Verbose $team
+        Write-Verbose ($team| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------TEAM---------"
 
         $team

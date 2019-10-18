@@ -74,6 +74,8 @@ function Get-AzDoSecurityGroupMembers()
 
         if ($null -eq $group) { Write-Error -ErrorAction $errorPreference -Message "Specified group not found" }
 
+        Write-Verbose "Found Group: $($group.descriptor):'$($group.displayName)'"
+
         $apiParams = @()
 
         $apiParams += "direction=Down"
@@ -84,40 +86,32 @@ function Get-AzDoSecurityGroupMembers()
         $groupMembers = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------GROUP MEMBERS---------"
-        Write-Verbose $groupMembers -ErrorAction SilentlyContinue
+        Write-Verbose ($groupMembers| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------GROUP MEMBERS---------"
 
-        if ($null -ne $groupMembers.count)
-        {   
-            foreach ($member in $groupMembers.value)
+        $groupMembers.value | % {
+            $member = $_
+
+            Write-Verbose "Group Member: $($member.memberDescriptor)"
+
+            if ($member.memberDescriptor -like "vssgp.*")
             {
-                Write-Verbose "Group Member: $($member.memberDescriptor)"
+                $g = $groups | ? { $_.descriptor -eq $member.memberDescriptor }
 
-                if ($member.memberDescriptor -like "vssgp.*")
-                {
-                    $g = $groups | ? { $_.displayName -eq $GroupName }
+                Write-Verbose "`tGroup: $($g.displayName)"
 
-                    Write-Verbose "`tGroup: $($g.displayName)"
-
-                    $g
-                }
-                elseif ($member.memberDescriptor -like "aad.*")
-                {
-                    $u = Get-AzDoUserDetails -AzDoConnection $AzDoConnection -UserDescriptor $($member.memberDescriptor)
-
-                    Write-Verbose "`tUser: $($u.displayName)"
-
-                    $u
-                } else {
-                    Write-Verbose "Unknown Membership Descriptor: $($member.memberDescriptor)"
-                }
+                $g
             }
-        } 
-        else 
-        {
-            Write-Verbose "No group members found."
-        
-            return $null
+            elseif ($member.memberDescriptor -like "aad.*")
+            {
+                $u = Get-AzDoUserDetails -AzDoConnection $AzDoConnection -UserDescriptor $($member.memberDescriptor)
+
+                Write-Verbose "`tUser: $($u.displayName)"
+
+                $u
+            } else {
+                Write-Verbose "Unknown Membership Descriptor: $($member.memberDescriptor)"
+            }
         }
     }
     END { }

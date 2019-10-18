@@ -83,7 +83,7 @@ function Get-AzDoProjectDetails()
         $projectDetails = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 
         Write-Verbose "---------PROJECTS DETAILS---------"
-        Write-Verbose $projectDetails
+        Write-Verbose ($projectDetails| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------PROJECTS DETAILS---------"
 
         return $projectDetails

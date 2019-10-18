@@ -77,10 +77,10 @@ function Get-AzDoDescriptors()
         $descriptors = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------DESCRIPTORS---------"
-        Write-Verbose $descriptors
+        Write-Verbose ($descriptors| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------DESCRIPTORS---------"
 
-        if ($descriptors -ne $null) {
+        if ($null -ne $descriptors) {
             return $descriptors.value;
         }
         

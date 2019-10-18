@@ -71,7 +71,7 @@ function Get-AzDoVariableGroupRoleDefinitions()
         $variableGroupRoleDefinitions = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 
         Write-Verbose "---------Role Definitions---------"
-        Write-Verbose $variableGroupRoleDefinitions
+        Write-Verbose ($variableGroupRoleDefinitions| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------Role Definitions---------"
         
         $variableGroupRoleDefinitions.value

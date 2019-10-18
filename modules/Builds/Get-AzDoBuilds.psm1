@@ -96,7 +96,7 @@ function Get-AzDoBuilds()
         $builds = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 
         Write-Verbose "---------BUILDS---------"
-        Write-Verbose $builds
+        Write-Verbose ($builds | ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------BUILDS---------"
 
         #Write-Verbose "Build status $($build.id) not found."

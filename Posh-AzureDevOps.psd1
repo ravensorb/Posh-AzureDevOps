@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.0.5'
+ModuleVersion = '1.0.7'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -73,6 +73,7 @@ NestedModules = @(
     '.\modules\Builds\Get-AzDoBuilds.psm1',
     '.\modules\Builds\Get-AzDoBuildWorkItems.psm1',
     '.\modules\Builds\Remove-AzDoBuildPipelineVariable.psm1',
+    '.\modules\Libraries\Add-AzDoLibrarySecurityRole.psm1',
     '.\modules\Libraries\Add-AzDoVariableGroupResourceAssignment.psm1',
     '.\modules\Libraries\Add-AzDoVariableGroupVariable.psm1',
     '.\modules\Libraries\Get-AzDoVariableGroupResourceAssignments.psm1',
@@ -83,6 +84,7 @@ NestedModules = @(
     '.\modules\Libraries\Remove-AzDoVariableGroup.psm1',
     '.\modules\Libraries\Remove-AzDoVariableGroupResourceAssignment.psm1',
     '.\modules\Libraries\Remove-AzDoVariableGroupVariable.psm1',
+    '.\modules\Libraries\Remove-AzDoLibrarySecurityRole.psm1',
     '.\modules\Libraries\Set-AzDoVariableGroupPermissionInheritance.psm1',
     '.\modules\Projects\Get-AzDoProjectDetails.psm1',
     '.\modules\Projects\Get-AzDoProjects.psm1',
@@ -111,8 +113,8 @@ NestedModules = @(
     '.\modules\Security\Remove-AzDoSecurityGroupMember.psm1',
     '.\modules\Security\Remove-AzDoTeam.psm1',
     '.\modules\ServiceEndpoints\Add-AzDoServiceEndpointSecurityRole.psm1',
-    '.\modules\ServiceEndpoints\Get-AzDoServiceEndpointRoles.psm1',
     '.\modules\ServiceEndpoints\Get-AzDoServiceEndpoints.psm1',
+    '.\modules\ServiceEndpoints\Get-AzDoServiceEndpointSecurityRoles.psm1',
     '.\modules\Utilities\Connect-AzDo.psm1',
     '.\modules\Utilities\Get-AzDoActiveConnection.psm1',
     '.\modules\Utilities\Get-AzDoApiUrl.psm1',
@@ -148,7 +150,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+         Tags = @( "azure devops", "azdo", "vsts" )
 
         # A URL to the license for this module.
         LicenseUri = 'https://github.com/ravensorb/Posh-AzureDevOps'
@@ -160,7 +162,7 @@ PrivateData = @{
         IconUri = 'https://github.com/ravensorb/Posh-AzureDevOps'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Cleanup and Fixes'
+        ReleaseNotes = 'Fixed a few issues with logging statements displaying incorrect details.`nAdded support for adding/removing library group security roles'
 
         # Prerelease string of this module
         # Prerelease = ''

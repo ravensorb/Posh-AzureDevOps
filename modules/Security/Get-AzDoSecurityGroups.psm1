@@ -73,7 +73,7 @@ function Get-AzDoSecurityGroups()
         $groups = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------GROUPS---------"
-        Write-Verbose $groups
+        Write-Verbose ($groups| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------GROUPS---------"
 
         if ($null -ne $groups.count -and $groups.count -gt 0)

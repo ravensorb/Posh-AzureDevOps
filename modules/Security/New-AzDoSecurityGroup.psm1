@@ -90,7 +90,7 @@ function New-AzDoSecurityGroup()
         $group = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
         
         Write-Verbose "---------GROUP---------"
-        Write-Verbose $group
+        Write-Verbose ($group| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------GROUP---------"
 
         $group

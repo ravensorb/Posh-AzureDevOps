@@ -74,7 +74,7 @@ function Get-AzDoBuildWorkItems()
         $buildWorkItems = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 
         Write-Verbose "---------BUILD WORKITEMS---------"
-        Write-Verbose $buildWorkItems
+        Write-Verbose ($buildWorkItems| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------BUILD WORKITEMS---------"
 
         #Write-Verbose "Build status $($build.id) not found."

@@ -95,10 +95,10 @@ function Get-AzDoBuildDefinition()
         $buildDefinitions = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------BUILD DEFINITION---------"
-        Write-Verbose $buildDefinitions
+        Write-Verbose ($buildDefinitions| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------BUILD DEFINITION---------"
 
-        if ($buildDefinitions.count -ne $null)
+        if ($null -ne $buildDefinitions.count)
         {   
             if (-Not [string]::IsNullOrEmpty($BuildDefinitionName))
             {
@@ -122,7 +122,7 @@ function Get-AzDoBuildDefinition()
 
             return $null
         } 
-        elseif ($buildDefinitions -ne $null) {
+        elseif ($null -ne $buildDefinitions) {
             return $buildDefinitions
         }
 

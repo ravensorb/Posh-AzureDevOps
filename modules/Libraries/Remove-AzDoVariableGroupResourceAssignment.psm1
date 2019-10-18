@@ -84,7 +84,7 @@ function Remove-AzDoVariableGroupResourceAssignment()
             Write-Error -ErrorAction $errorPreference -Message "Variable Group '[$($VariableGroupId)]:$($VariableGroupName)' not found"
         }
 
-        $resourceAssignments = Get-AzDoVariableGroupResourceAssignments -VariableGroupName $($variableGroup.name) | ? {$_.access -eq "assigned" -and ($_.identity.displayName -eq $UserOrGroupName -or $_.identity.principalName -eq $UserOrGroupName) } 
+        $resourceAssignments = Get-AzDoVariableGroupResourceAssignments -VariableGroupName $($variableGroup.name) | ? { ($_.identity.displayName -eq $UserOrGroupName -or $_.identity.principalName -eq $UserOrGroupName) } 
 
         if ($null -eq $resourceAssignments -or $resourceAssignments.length -eq 0)
         {
@@ -95,9 +95,15 @@ function Remove-AzDoVariableGroupResourceAssignment()
         $assignmentsToDelete = @()
         $assignmentsToDelete += ""
 
-        $resourceAssignments.identity | % {
-            Write-Verbose "Removing User/Group: '$($_.displayName)' from '$($VariableGroupName)'"
-            $assignmentsToDelete += $_.id
+        $resourceAssignments | % {
+            Write-Verbose "Removing User/Group: '$($_.identity.displayName)' from '$($VariableGroupName)'"
+            if ($_.access -ne "assigned") 
+            {   
+                Write-Verbose ($_ | ConvertTo-Json | Out-String )
+                Write-Warning "`tGroup Access is: '$($_.access)'.  Should be 'Assigned'. This might be an issue."
+            }
+            
+            $assignmentsToDelete += $_.identity.id
         }
 
         $body = $assignmentsToDelete | ConvertTo-Json -Depth 10 -Compress

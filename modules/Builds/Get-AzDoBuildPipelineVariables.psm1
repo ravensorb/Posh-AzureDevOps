@@ -96,7 +96,7 @@ function Get-AzDoBuildPipelineVariables()
         $definition = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
 
         Write-Verbose "---------BUILD DEFINITION---------"
-        Write-Verbose $definition
+        Write-Verbose ($definition| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------BUILD DEFINITION---------"
 
         if (-Not $definition.variables) {

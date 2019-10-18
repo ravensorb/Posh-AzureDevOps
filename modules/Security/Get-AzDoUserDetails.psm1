@@ -73,7 +73,7 @@ function Get-AzDoUserDetails()
         $user = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------USER DETAILS---------"
-        Write-Verbose $user
+        Write-Verbose ($user| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------USER DETAILS---------"
 
         return $user

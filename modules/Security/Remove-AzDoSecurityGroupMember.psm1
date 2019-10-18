@@ -78,7 +78,7 @@ function Remove-AzDoSecurityGroupMember()
 
         $m = Get-AzDoUsers -AzDoConnection $AzDoConnection | ? { $_.displayName -like $MemberName }
         if ($null -eq $m) { $m =  $groups | ? { $_.displayName -like $GroupName -or $_.principalName -like $GroupName } }
-        if ($null -eq $m) { Write-Error -ErrorAction $errorPreference -Message "Specified Meber could not be found: $($MemberName)" }
+        if ($null -eq $m) { Write-Error -ErrorAction $errorPreference -Message "Specified Member could not be found: $($MemberName)" }
 
         #$apiParams += "scopeDescriptor=$($AzDoConnection.ProjectDescriptor)"
 
@@ -89,7 +89,7 @@ function Remove-AzDoSecurityGroupMember()
         $result = Invoke-RestMethod $apiUrl -Method DELETE -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
         
         Write-Verbose "---------RESULT---------"
-        Write-Verbose $result 
+        Write-Verbose ($result | ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------RESULT---------"
 
         $result

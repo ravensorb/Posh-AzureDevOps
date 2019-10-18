@@ -87,7 +87,7 @@ function Get-AzDoTeamMemebers()
         $teams = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------TEAM MEMBERS---------"
-        Write-Verbose $teams
+        Write-Verbose ($teams| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------TEAM MEMBERS---------"
 
         return $teams.value.identity

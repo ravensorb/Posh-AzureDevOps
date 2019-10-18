@@ -15,6 +15,9 @@ Allows for specifying a specific version of the api to use (default is 5.0)
 .PARAMETER QueryString
 What to search for
 
+.PARAMETER MaxResults
+Max Number of Results (Defaults to 50)
+
 .EXAMPLE
 Get-AzDoIdentities -QueryString <search string>
 
@@ -36,7 +39,8 @@ function Get-AzDoIdentities()
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter()]$QueryString
+        [string][parameter()]$QueryString,
+        [int][parameter()]$MaxResults = 50
     )
     BEGIN
     {
@@ -87,8 +91,8 @@ function Get-AzDoIdentities()
             identityTypes=@("group","user");
             operationScopes=@("ims","source");
             options=@{
-                MinResults=5;
-                MaxResults=20;
+                MinResults=1;
+                MaxResults=$MaxResults;
             };
             properties=@("DisplayName", "IsMru", "ScopeName", "SamAccountName", "Active", "SubjectDescriptor", "Department", "JobTitle", "Mail", "MailNickname", "PhysicalDeliveryOfficeName", "SignInAddress", "Surname", "Guest", "TelephoneNumber", "Manager", "Description")
         }
@@ -100,7 +104,7 @@ function Get-AzDoIdentities()
         $results = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------RESULTS---------"
-        Write-Verbose $results
+        Write-Verbose ($results| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------RESULTS---------"
 
         if ($null -ne $results)

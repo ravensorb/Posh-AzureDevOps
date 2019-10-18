@@ -79,7 +79,7 @@ function Get-AzDoTeams()
         $teamsResult = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------TEAMS---------"
-        Write-Verbose $teamsResult
+        Write-Verbose ($teamsResult| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------TEAMS---------"
 
         $teamsResult.value | ForEach-Object { 

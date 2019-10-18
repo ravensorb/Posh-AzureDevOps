@@ -6,14 +6,17 @@ Add permission for a specific Azure DevOps libary
 .DESCRIPTION
 The command will add the permissions for the specificed variable group
 
-.PARAMETER VariableGroupName
-The name of the variable group to retrieve
+.PARAMETER UserOrGroupName
+The name of the user, group, or team name
+
+.PARAMETER RoleName
+The name of the role to add the user as 
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Add-AzDoVariableGroupResourceAssignment -VariableGroupName <variable group name>
+Add-AzDoLibrarySecurityRole -UserOrGroupName <user or group/team name> -RoleName <role name>
 
 .NOTES
 
@@ -21,7 +24,7 @@ Add-AzDoVariableGroupResourceAssignment -VariableGroupName <variable group name>
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Add-AzDoVariableGroupResourceAssignment()
+function Add-AzDoLibrarySecurityRole()
 {
     [CmdletBinding(
         DefaultParameterSetName="Name"
@@ -33,9 +36,6 @@ function Add-AzDoVariableGroupResourceAssignment()
         [string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName="Name")][Alias("name")]$VariableGroupName,
-        [int][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName="ID")][Alias("id")]$VariableGroupId,
-
         [string][parameter(ValueFromPipelinebyPropertyName = $true)]$RoleName,
         [string][parameter(ValueFromPipelinebyPropertyName = $true)]$UserOrGroupName
     )
@@ -51,8 +51,8 @@ function Add-AzDoVariableGroupResourceAssignment()
             $errorPreference = $PSBoundParameters['ErrorAction']
         }
     
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.1-preview" }
-        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.1-preview" }
+        if ((-Not (Test-Path variable:ApiVersion)) -or $ApiVersion -ne "6.0-preview") { $ApiVersion = "6.0-preview" }
+        if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "6.0-preview" }
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
@@ -68,21 +68,7 @@ function Add-AzDoVariableGroupResourceAssignment()
     }
     PROCESS
     {
-        if ([string]::IsNullOrEmpty($VariableGroupName) -and [string]::IsNullOrEmpty($VariableGroupId))
-        {
-            Write-Error -ErrorAction $errorPreference -Message "Specify either Variable Group Name or Variable Group Id"
-            return
-        }
-
-        $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -like $VariableGroupName -or $_.id -eq $VariableGroupId }
-
-        if ($null -eq $variableGroup)
-        {
-            Write-Error -ErrorAction $errorPreference -Message "Variable Group '[$($VariableGroupId)]:$($VariableGroupName)' not found"
-            return
-        }
-
-        $userOrGroup = Get-AzDoIdentities -AzDoConnection $AzDoConnection -QueryString $UserOrGroupName
+        $userOrGroup = Get-AzDoIdentities -AzDoConnection $AzDoConnection -QueryString "[$($AzDoConnection.ProjectName)]\$UserOrGroupName"
 
         if ($null -eq $userOrGroup)
         {
@@ -90,9 +76,9 @@ function Add-AzDoVariableGroupResourceAssignment()
             return
         }
 
-        # PUT https://<acct>.visualstudio.com/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/<projID>$<VarGroupID>?api-version=5.0-preview.1
+        # PUT https://<acct>.visualstudio.com/_apis/securityroles/scopes/distributedtask.library/roleassignments/resources/<projID>?api-version=5.0-preview.1
         # [{"roleName":"<role>","userId":",<UserGUID>"}]
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/securityroles/scopes/distributedtask.variablegroup/roleassignments/resources/$($AzDoConnection.ProjectId)`$$($variableGroup.Id)"
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/securityroles/scopes/distributedtask.library/roleassignments/resources/$($AzDoConnection.ProjectId)`$0"
 
         $body = "[{`"roleName`":`"$($RoleName)`",`"userId`":`"$($userOrGroup.originId)`"}]"
         # $roleDetails = @()
@@ -103,7 +89,6 @@ function Add-AzDoVariableGroupResourceAssignment()
         Write-Verbose $body
         Write-Verbose "---------BODY---------"
 
-        # {"count":1,"value":[{"identity":{"displayName":"[3Pager]\\Variable Groups Managers - AWS","id":"e208eaf7-5b55-40a9-8898-0d43ade92799","uniqueName":"[3Pager]\\Variable Groups Managers - AWS"},"role":{"displayName":"User","name":"User","allowPermissions":17,"denyPermissions":0,"identifier":"distributedtask.variablegroup.User","description":"User can use, but cannot manage the library items.","scope":"distributedtask.variablegroup"},"access":"assigned","accessDisplayName":"Assigned"}]}
         $response = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
         
         Write-Verbose "Response: $($response.id)"

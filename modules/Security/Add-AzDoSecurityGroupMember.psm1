@@ -79,20 +79,18 @@ function Add-AzDoSecurityGroupMember()
         $m = Get-AzDoUserEntitlements -AzDoConnection $AzDoConnection | ? { $_.user.displayName -like $MemberName -or $_.user.principalName -like $MemberName }
         if ($null -eq $m) { $m =  Get-AzDoTeams -AzDoConnection $AzDoConnection | ? { $_.name -like $MemberName } } 
         if ($null -eq $m) { $m =  $groups | ? { $_.displayName -like $MemberName -or $_.principalName -like $MemberName } } 
-        if ($null -eq $m) { Write-Error -ErrorAction $errorPreference -Message "Specified Meber could not be found: $($MemberName)" }
+        if ($null -eq $m) { Write-Error -ErrorAction $errorPreference -Message "Specified Member could not be found: $($MemberName)" }
 
         #$apiParams += "scopeDescriptor=$($AzDoConnection.ProjectDescriptor)"
 
         # PUT https://vssps.dev.azure.com/{orgName}/_apis/graph/Memberships/{subjectDescriptor}/{groupDescriptor}?api-version=5.0-preview.1
         $apiUrl = Get-AzDoApiUrl -RootPath $AzDoConnection.VsspUrl -ApiVersion $ApiVersion -BaseApiPath "/_apis/graph/Memberships/$($m.descriptor)/$($g.descriptor)" -QueryStringParams $apiParams
 
-        
-
         #Write-Host $apiUrl
         $result = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
         
         Write-Verbose "---------RESULT---------"
-        Write-Verbose $result 
+        Write-Verbose ($result | ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------RESULT---------"
 
         #$result

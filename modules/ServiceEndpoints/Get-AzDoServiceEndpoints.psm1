@@ -70,7 +70,7 @@ function Get-AzDoServiceEndpoints()
         $results = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------RESULTS---------"
-        Write-Verbose $results
+        Write-Verbose ($results| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------RESULTS---------"
 
         if ($results.count -gt 0) 

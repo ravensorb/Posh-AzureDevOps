@@ -77,7 +77,7 @@ function Get-AzDoProjects()
         $projects = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         
         Write-Verbose "---------PROJECTS---------"
-        Write-Verbose $projects
+        Write-Verbose ($projects| ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------PROJECTS---------"
 
         if ($null -ne $projects.count)
@@ -97,7 +97,7 @@ function Get-AzDoProjects()
                 return $projects.value
             }
         }
-        elseif ($projects -ne $null) {
+        elseif ($null -ne $projects) {
             return $projects
         }
 
