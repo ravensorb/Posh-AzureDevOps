@@ -6,13 +6,13 @@ function Get-AzDoHttpHeader()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true, ParameterSetName="Connection")]$AzDoConnection,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName="Specific")]$ProjectUrl,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName="Specific")]$PAT,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ParameterSetName="Specific")][string]$ProjectUrl,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ParameterSetName="Specific")][string]$PAT,
 
         # Module Parameters
-        [string][parameter(DontShow)]$OAuthToken
+        [parameter(Mandatory=$false, DontShow)][string]$OAuthToken
     )
     BEGIN
     {

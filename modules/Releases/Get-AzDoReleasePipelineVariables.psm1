@@ -35,14 +35,14 @@ function Get-AzDoReleasePipelineVariables()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ValueFromPipeline=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [int][parameter(ParameterSetName='Id', ValueFromPipelineByPropertyName = $true)][Alias("id")]$ReleaseDefinitionId = $null,
-        [string][parameter(ParameterSetName='Name', ValueFromPipelineByPropertyName = $true)][Alias("name")]$ReleaseDefinitionName = $null,
-        [string][parameter(ValueFromPipelineByPropertyName = $true)]$VariableName,
-        [string][parameter(ValueFromPipelineByPropertyName = $true)]$EnvironmentName = $null
+        [parameter(Mandatory=$false, ParameterSetName="Name", ValueFromPipelinebyPropertyName=$true)][string]$ReleaseDefinitionName,
+        [parameter(Mandatory=$false, ParameterSetName="ID", ValueFromPipelinebyPropertyName=$true)][int]$ReleaseDefinitionId,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true)][string]$VariableName,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true)][string]$EnvironmentName = $null
     )
     BEGIN
     {

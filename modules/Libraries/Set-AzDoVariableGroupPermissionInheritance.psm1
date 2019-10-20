@@ -30,13 +30,13 @@ function Set-AzDoVariableGroupPermissionInheritance()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName="Name")][Alias("name")]$VariableGroupName,
-        [int][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName="ID")][Alias("id")]$VariableGroupId,
-        [bool]$InheritPermissions = $true
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ParameterSetName="Name")][Alias("name")][string]$VariableGroupName,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ParameterSetName="ID")][Alias("id")][int]$VariableGroupId,
+        [parameter(Mandatory=$false)][bool]$InheritPermissions = $true
     )
     BEGIN
     {

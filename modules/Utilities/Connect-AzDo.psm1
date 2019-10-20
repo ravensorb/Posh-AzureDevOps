@@ -34,10 +34,10 @@ function Connect-AzDo()
     )]
     param
     (
-        [string][parameter(ParameterSetName = "FullUrl", Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
+        [string][parameter(ParameterSetName = "FullUrl", Mandatory = $true, ValueFromPipelinebyPropertyName=$true)]$ProjectUrl,
         [string][parameter(ParameterSetName = "OrgUrlAndProjectName", Mandatory = $true, ValueFromPipelineByPropertyName)]$OrganizationUrl,
         [string][parameter(ParameterSetName = "OrgUrlAndProjectName", Mandatory = $true, ValueFromPipelineByPropertyName)]$ProjectName,
-        [string][parameter(Mandatory = $false, ValueFromPipelinebyPropertyName = $true)]$PAT,
+        [string][parameter(Mandatory = $false, ValueFromPipelinebyPropertyName=$true)]$PAT,
         [string][Parameter(DontShow)]$OAuthToken,
         [switch][parameter(DontShow)]$LocalOnly
     )

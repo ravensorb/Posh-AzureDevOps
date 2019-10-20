@@ -36,14 +36,14 @@ function Remove-AzDoVariableGroupResourceAssignment()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName="Name")][Alias("name")]$VariableGroupName,
-        [int][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName="ID")][Alias("id")]$VariableGroupId,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ParameterSetName="Name")][Alias("name")][string]$VariableGroupName,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ParameterSetName="ID")][Alias("id")][int]$VariableGroupId,
 
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$UserOrGroupName
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true)][string]$UserOrGroupName
     )
     BEGIN
     {

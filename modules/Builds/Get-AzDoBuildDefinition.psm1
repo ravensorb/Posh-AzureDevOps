@@ -35,13 +35,13 @@ function Get-AzDoBuildDefinition()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ParameterSetName='Name', ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)][Alias("name")]$BuildDefinitionName,
-        [int][parameter(ParameterSetName='ID', ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)][Alias("id")]$BuildDefinitionId,
-        [string]$ExpandFields
+        [parameter(Mandatory=$false, ParameterSetName="Name", ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][string][Alias("name")]$BuildDefinitionName,
+        [parameter(Mandatory=$false, ParameterSetName="ID", ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][int][Alias("id")]$BuildDefinitionId,
+        [parameter(Mandatory=$false)][string]$ExpandFields
     )
     BEGIN
     {

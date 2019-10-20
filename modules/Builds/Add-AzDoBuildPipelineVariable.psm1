@@ -51,17 +51,17 @@ function Add-AzDoBuildPipelineVariable()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
-
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
+        
         # Module Parameters
-        [int][parameter(ParameterSetName='Id', ValueFromPipelineByPropertyName = $true)]$BuildDefinitionId = $null,
-        [string][parameter(ParameterSetName='Name', ValueFromPipelineByPropertyName = $true)]$BuildDefinitionName = $null,
-        [string][parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]$VariableName,
-        [string][parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]$VariableValue,
-        [bool][parameter(ValueFromPipelineByPropertyName = $true)]$Secret,
-        [int[]]$VariableGroups,
-        [string]$Comment
+        [parameter(Mandatory=$false, ParameterSetName="ID", ValueFromPipelineByPropertyName=$true)][int]$BuildDefinitionId = $null,
+        [parameter(Mandatory=$false, ParameterSetName="Name", ValueFromPipelineByPropertyName=$true)][string]$BuildDefinitionName = $null,
+        [parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)][string]$VariableName,
+        [parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)][string]$VariableValue,
+        [parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)][bool]$Secret,
+        [parameter(Mandatory=$false)][int[]]$VariableGroups,
+        [parameter(Mandatory=$false)][string]$Comment
 
     )
     BEGIN
@@ -98,7 +98,7 @@ function Add-AzDoBuildPipelineVariable()
             $definition = Get-AzDoBuildDefinition -AzDoConnection $AzDoConnection -BuildDefinitionName $BuildDefinitionName -ExpandFields "variables"
         }
 
-        if ($definition -eq $null) { Write-Error -ErrorAction $errorPreference -Message "Could not find a valid build definition.  Check your parameters and try again";}
+        if ($null -eq $definition) { Write-Error -ErrorAction $errorPreference -Message "Could not find a valid build definition.  Check your parameters and try again";}
 
         if ($Reset)
         {

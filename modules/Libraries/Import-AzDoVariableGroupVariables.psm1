@@ -39,15 +39,15 @@ function Import-AzDoVariableGroupVariables()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(Mandatory = $true)]$CsvFile,
-        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$VariableGroupName,
-        [string]$EnvironmentNameFilter = "*",
-        [switch]$Reset,
-        [switch]$Force
+        [parameter(Mandatory=$true)][string]$CsvFile,
+        [parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)][string]$VariableGroupName,
+        [parameter(Mandatory=$false)][string]$EnvironmentNameFilter = "*",
+        [parameter(Mandatory=$false)][switch]$Reset,
+        [parameter(Mandatory=$false)][switch]$Force
     )
     BEGIN
     {

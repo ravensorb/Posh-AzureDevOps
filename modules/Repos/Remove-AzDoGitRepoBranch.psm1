@@ -1,16 +1,22 @@
 <#
 
 .SYNOPSIS
-Remove a git repository
+Remove a branch from a git repostiory
 
 .DESCRIPTION
-The command will remove a specific git repository
+The command will add a remove an existing branch from a git repositories
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
+.PARAMETER Name
+Name of the git repository
+
+.PARAMETER BranchName
+Name of the branch 
+
 .EXAMPLE
-Remove-AzDoGitRepo -Name <git repo name>
+Remove-AzDoGitRepoBranch -Name <git repo name> -BranchName <branch name> 
 
 .NOTES
 
@@ -18,7 +24,7 @@ Remove-AzDoGitRepo -Name <git repo name>
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Remove-AzDoGitRepo()
+function Remove-AzDoGitRepoBranch()
 {
     [CmdletBinding(
         SupportsShouldProcess=$True
@@ -30,7 +36,8 @@ function Remove-AzDoGitRepo()
         [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [parameter(Mandatory=$true)][string]$Name
+        [parameter(Mandatory=$true)][string]$Name,
+        [parameter(Mandatory=$true)][string]$BranchName
     )
     BEGIN
     {
@@ -44,7 +51,7 @@ function Remove-AzDoGitRepo()
             $errorPreference = $PSBoundParameters['ErrorAction']
         }
 
-        if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.1"}
+        if (-Not (Test-Path variable:ApiVersion) -or $ApiVersion -ne "4.1") { $ApiVersion = "4.1"}
 
         if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
         {
@@ -60,28 +67,48 @@ function Remove-AzDoGitRepo()
     PROCESS
     {
         $repo = Get-AzDoGitRepos -AzDoConnection $AzDoConnection | ? { $_.name -eq $Name }
+        
         if ($null -eq $repo)
         {
-            Write-Error "Requested Git Repository does not exist: $($repo)"
+            Write-Error "Specified Repo '$Name' Not Found."
+
+            return
+        }
+
+        $existingBranches = Get-AzDoGitRepoBranches -AzDoConnection $AzDoConnection -Name $Name
+
+        $existingBranch = $existingBranches | ? { $_.name -eq "refs/heads/$BranchName"}
+        if ($null -eq $existingBranch)
+        {
+            Write-Error "Specified Branch does not exist: $BranchName"
 
             return
         }
 
         $apiParams = @()
 
-        # DELETE https://dev.azure.com/{organization}/{project}/_apis/git/repositories/{repositoryId}?api-version=5.1
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/git/repositories/$($repo.id)" -QueryStringParams $apiParams
+        # POST https://dev.azure.com/{organization}/{project}/_apis/git/repositories/{repositoryId}/refs?api-version=4.1
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/git/repositories/$($repo.id)/refs" -QueryStringParams $apiParams
+
+        # [{"name":"refs/heads/dev","newObjectId":"4aac2e2e07837b2c5e7e298c7167ca05cb5415e1","oldObjectId":"0000000000000000000000000000000000000000"}]
+        $data = @(@{name="refs/heads/$($BranchName)";newObjectId="0000000000000000000000000000000000000000";oldObjectId="$($existingBranch.objectid)"})
+        $body = $data | ConvertTo-Json -Depth 10 -Compress
+        $body = "[$($body)]"
+
+        Write-Verbose "---------Request---------"
+        Write-Verbose $body
+        Write-Verbose "---------Reqest---------"
 
         if (-Not $WhatIfPreference)
         {
-            $response = Invoke-RestMethod $apiUrl -Method DELETE -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+            $results = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)   
         }
         
         Write-Verbose "---------Repos---------"
         Write-Verbose ($results | ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------Repos---------"
 
-        return $response
+        return $results
     }
     END {
         Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"

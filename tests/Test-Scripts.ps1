@@ -2,9 +2,9 @@
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        #[string][parameter(ValueFromPipelinebyPropertyName = $true)]$ProjectUrl,
-        #[string][parameter(ValueFromPipelinebyPropertyName = $true)]$PAT,
+        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)]$AzDoConnection,
+        #[parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true)][string]$ProjectUrl,
+        #[parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true)][string]$PAT,
         [string]$ApiVersion = $global:AzDoApiVersion,
                 
         # Script Parameters

@@ -35,12 +35,12 @@ function Get-AzDoIdentities()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter()]$QueryString,
-        [int][parameter()]$MaxResults = 50
+        [parameter(Mandatory=$false)][string]$QueryString,
+        [parameter(Mandatory=$false)][int]$MaxResults = 50
     )
     BEGIN
     {

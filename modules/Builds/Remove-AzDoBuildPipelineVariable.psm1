@@ -39,14 +39,14 @@ function Remove-AzDoBuildPipelineVariable()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [int][parameter(ParameterSetName='Id', ValueFromPipelineByPropertyName = $true)]$BuildDefinitionId = $null,
-        [string][parameter(ParameterSetName='Name', ValueFromPipelineByPropertyName = $true)]$BuildDefinitionName = $null,
-        [string][parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]$VariableName,
-        [switch]$All
+        [parameter(Mandatory=$false, ParameterSetName="ID", ValueFromPipelineByPropertyName=$true)][int]$BuildDefinitionId = $null,
+        [parameter(Mandatory=$false, ParameterSetName="Name", ValueFromPipelineByPropertyName=$true)][string]$BuildDefinitionName = $null,
+        [parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)][string]$VariableName,
+        [parameter(Mandatory=$false)][switch]$All
     )
     BEGIN
     {

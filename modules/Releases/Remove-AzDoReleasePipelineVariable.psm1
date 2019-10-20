@@ -40,14 +40,14 @@ function Remove-AzDoReleasePipelineVariable()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ValueFromPipeline=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [int][parameter(ParameterSetName='Id', ValueFromPipelineByPropertyName = $true)]$ReleaseDefinitionId = $null,
-        [string][parameter(ParameterSetName='Name', ValueFromPipelineByPropertyName = $true)]$ReleaseDefinitionName = $null,
-        [string][parameter( ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
-        [switch]$All
+        [parameter(Mandatory=$false, ParameterSetName="Name", ValueFromPipelinebyPropertyName=$true)][string]$ReleaseDefinitionName,
+        [parameter(Mandatory=$false, ParameterSetName="ID", ValueFromPipelinebyPropertyName=$true)][int]$ReleaseDefinitionId,
+        [parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)][Alias("name")][string]$VariableName,
+        [parameter(Mandatory=$false)][switch]$All
     )
     BEGIN
     {

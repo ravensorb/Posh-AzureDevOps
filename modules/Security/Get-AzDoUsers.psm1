@@ -46,13 +46,13 @@ function Get-AzDoUsers()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ParameterSetName="Name")][Alias("name")]$UserName,
-        [string][parameter(ParameterSetName="Email")][Alias("email")]$UserEmail,
-        [Guid][parameter(ParameterSetName="Id")][Alias("id")]$UserId = [Guid]::Empty
+        [parameter(Mandatory=$false, ParameterSetName="Name")][Alias("name")][string]$UserName,
+        [parameter(Mandatory=$false, ParameterSetName="Email")][Alias("email")][string]$UserEmail,
+        [parameter(Mandatory=$false, ParameterSetName="Id")][Alias("id")][Guid]$UserId = [Guid]::Empty
     )
     BEGIN
     {

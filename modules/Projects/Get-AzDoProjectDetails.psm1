@@ -35,12 +35,12 @@ function Get-AzDoProjectDetails()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ParameterSetName="Name")][Alias("name")]$ProjectName,
-        [Guid][parameter(ParameterSetName="ID", ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)][Alias("id")]$ProjectId
+        [parameter(Mandatory=$true, ParameterSetName="Name")][Alias("name")][string]$ProjectName,
+        [parameter(Mandatory=$true, ParameterSetName="ID", ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)][Alias("id")][Guid]$ProjectId
     )
     BEGIN
     {

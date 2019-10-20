@@ -33,12 +33,12 @@ function Add-AzDoLibrarySecurityRole()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$RoleName,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$UserOrGroupName
+        [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true)][string]$RoleName,
+        [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true)][string]$UserOrGroupName
     )
     BEGIN
     {

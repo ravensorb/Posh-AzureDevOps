@@ -4,11 +4,11 @@ function Get-AzDoApiUrl()
     param
     (
         # Common Parameters
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
-        [string][parameter(Mandatory = $true)]$RootPath,
-        [string][parameter(Mandatory = $true)]$BaseApiPath,
-        [string[]]$QueryStringParams = $null
+        [parameter(Mandatory=$true)][string]$RootPath,
+        [parameter(Mandatory=$true)][string]$BaseApiPath,
+        [parameter(Mandatory=$false)][string[]]$QueryStringParams = $null
     )
     BEGIN
     {

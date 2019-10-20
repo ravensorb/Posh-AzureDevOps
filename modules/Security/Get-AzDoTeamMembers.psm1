@@ -34,12 +34,12 @@ function Get-AzDoTeamMemebers()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ParameterSetName='Name', ValueFromPipelineByPropertyName=$true)]$TeamName,
-        [Guid][parameter(ParameterSetName='ID', ValueFromPipelineByPropertyName=$true)][Alias("id")]$TeamId
+        [parameter(Mandatory=$false, ParameterSetName="Name", ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)][Alias("name")][string]$TeamName,
+        [parameter(Mandatory=$false, ParameterSetName="ID", ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)][Alias("id")][Guid]$TeamId
     )
     BEGIN
     {

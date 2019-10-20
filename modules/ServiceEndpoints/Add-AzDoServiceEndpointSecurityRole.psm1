@@ -39,15 +39,15 @@ function Add-AzDoServiceEndpointSecurityRole()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName="Name")]$EndpointName,
-        [Guid][parameter(ValueFromPipelineByPropertyName = $true, ParameterSetName="ID")]$EndpointId,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ParameterSetName="Name")][string]$EndpointName,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ParameterSetName="ID")][Guid]$EndpointId,
 
-        [string][parameter()]$MemberName,
-        [string][parameter()]$RoleName
+        [parameter(Mandatory=$false)][string]$MemberName,
+        [parameter(Mandatory=$false)][string]$RoleName
     )
     BEGIN
     {

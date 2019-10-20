@@ -23,15 +23,19 @@ https://github.com/ravensorb/Posh-AzureDevOps
 #>
 function Get-AzDoGitRepoBranches()
 {
-    [CmdletBinding()]
+    [CmdletBinding(
+            DefaultParameterSetName="Name",
+            SupportsShouldProcess=$True
+    )]
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string]$Name
+        [parameter(Mandatory=$false, ParameterSetName="Name")][string]$Name,
+        [parameter(Mandatory=$false, ParameterSetName="ID")][Guid]$Id
     )
     BEGIN
     {
@@ -60,13 +64,22 @@ function Get-AzDoGitRepoBranches()
     }
     PROCESS
     {
+        $repo = Get-AzDoGitRepos -AzDoConnection $AzDoConnection | ? { $_.name -eq $Name -or $_.id -eq $Id }
+
+        if ($null -eq $repo)
+        {
+            Write-Error "Specified Repo Not Found..."
+
+            return
+        }
+
         $apiParams = @()
 
         $apiParams += "includeStatuses=True"
         $apiParams += "latestStatusesOnly=True"
 
         # GET https://dev.azure.com/{organization}/{project}/_apis/git/repositories/{repositoryId}/refs?api-version=5
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/git/repositories/$($Name)/refs" -QueryStringParams $apiParams
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/git/repositories/$($repo.id)/refs" -QueryStringParams $apiParams
 
         $branches = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders 
         

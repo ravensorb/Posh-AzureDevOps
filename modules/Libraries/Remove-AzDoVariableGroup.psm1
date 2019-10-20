@@ -29,12 +29,12 @@ function Remove-AzDoVariableGroup()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true, ParameterSetName="name")][Alias("name")]$VariableGroupName,
-        [int][parameter(Mandatory = $true, ValueFromPipelinebyPropertyName = $true, ParameterSetName="id")][Alias("id")]$VariableGroupId
+        [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true, ParameterSetName="Name")][Alias("name")][string]$VariableGroupName,
+        [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true, ParameterSetName="id")][Alias("id")][int]$VariableGroupId
     )
     BEGIN
     {

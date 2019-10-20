@@ -36,11 +36,11 @@ function Remove-AzDoSecurityGroup()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName = "Name")]$GroupName
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ParameterSetName = "Name")][string]$GroupName
     )
     BEGIN
     {

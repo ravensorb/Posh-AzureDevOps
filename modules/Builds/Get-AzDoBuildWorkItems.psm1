@@ -29,12 +29,12 @@ function Get-AzDoBuildWorkItems()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [int][parameter(ParameterSetName='ID', Mandatory = $true, ValueFromPipelinebyPropertyName = $true)]$BuildId,
-        [int]$Count = 1
+        [parameter(Mandatory=$true, ParameterSetName="ID", ValueFromPipelinebyPropertyName=$true)][int]$BuildId,
+        [parameter(Mandatory=$false)][int]$Count = 1
     )
     BEGIN
     {

@@ -55,19 +55,19 @@ function Add-AzDoReleasePipelineVariable()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true, ValueFromPipeline=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [int][parameter(ParameterSetName='Id', ValueFromPipelineByPropertyName = $true)]$ReleaseDefinitionId = $null,
-        [string][parameter(ParameterSetName='Name', ValueFromPipelineByPropertyName = $true)]$ReleaseDefinitionName = $null,
-        [string][parameter(ValueFromPipelineByPropertyName = $true)][Alias("name")]$VariableName,
-        [string][parameter(ValueFromPipelineByPropertyName = $true)][Alias("value")]$VariableValue,
-        [string][parameter(ValueFromPipelineByPropertyName = $true)][Alias("env")]$EnvironmentName,
-        [bool][parameter(ValueFromPipelineByPropertyName = $true)]$Secret,
-        [int[]]$VariableGroups,
-        [string]$Comment,
-        [switch]$Reset
+        [parameter(Mandatory=$false, ParameterSetName="Id", ValueFromPipelinebyPropertyName=$true)][int]$ReleaseDefinitionId = $null,
+        [parameter(Mandatory=$false, ParameterSetName="Name", ValueFromPipelinebyPropertyName=$true)][string]$ReleaseDefinitionName = $null,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true)][Alias("name")][string]$VariableName,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true)][Alias("value")][string]$VariableValue,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true)][Alias("env")][string]$EnvironmentName,
+        [parameter(Mandatory=$false, ValueFromPipelinebyPropertyName=$true)][bool]$Secret,
+        [parameter(Mandatory=$false)][int[]]$VariableGroups,
+        [parameter(Mandatory=$false)][string]$Comment,
+        [parameter(Mandatory=$false)][switch]$Reset
     )
     BEGIN
     {

@@ -30,15 +30,15 @@ function Add-AzDoVariableGroupResourceAssignment()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName="Name")][Alias("name")]$VariableGroupName,
-        [int][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName="ID")][Alias("id")]$VariableGroupId,
+        [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true, ParameterSetName="Name")][string][Alias("name")]$VariableGroupName,
+        [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true, ParameterSetName="ID")][int][Alias("id")]$VariableGroupId,
 
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$RoleName,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true)]$UserOrGroupName
+        [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true)][string]$RoleName,
+        [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true)][string]$UserOrGroupName
     )
     BEGIN
     {

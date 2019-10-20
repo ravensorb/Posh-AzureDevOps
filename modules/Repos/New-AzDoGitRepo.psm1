@@ -26,11 +26,12 @@ function New-AzDoGitRepo()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [string][parameter()]$Name
+        [parameter(Mandatory=$true)][string]$Name,
+        [parameter(Mandatory=$false)][switch]$Initialize = $false
     )
     BEGIN
     {
@@ -79,14 +80,76 @@ function New-AzDoGitRepo()
 
         if (-Not $WhatIfPreference)
         {
-            $response = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)    
+            $results = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)   
         }
         
         Write-Verbose "---------Repos---------"
         Write-Verbose ($results | ConvertTo-Json -Depth 50 | Out-String)
         Write-Verbose "---------Repos---------"
 
-        return $response
+        if ($Initialize) 
+        {
+            # POST https://dev.azure.com/{organization}/_apis/git/repositories/{repositoryId}/pushes?api-version=5.1
+            $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/git/repositories/$($results.id)/pushes" -QueryStringParams $apiParams
+
+            # {
+            #     "refUpdates": [ { "name": "refs/heads/master", "oldObjectId": "0000000000000000000000000000000000000000" } ],
+            #     "commits": [
+            #         {
+            #             "comment": "Added README.md file",
+            #             "changes": [
+            #                 {
+            #                     "changeType": 1,
+            #                     "item": { "path": "/README.md" },
+            #                     "newContentTemplate": { "name": "README.md", "type": "readme" }
+            #                 }
+            #             ]
+            #         }
+            #     ]
+            # }
+
+            $data = @{
+                        refUpdates=@(
+                            @{
+                                name="refs/heads/master"; 
+                                oldObjectId="0000000000000000000000000000000000000000" 
+                            }
+                        ); 
+                        commits=@(
+                            @{
+                                comment="Added README.md file"; 
+                                changes=@(
+                                    @{
+                                        changeType=1;
+                                        item=@{path="/README.md"}; 
+                                        newContentTemplate=@{
+                                            name="README.md"; 
+                                            type="readme"
+                                        }
+                                    }
+                                )
+                            }
+                        )
+                    }
+
+            $body = $data | ConvertTo-Json -Depth 20
+
+            Write-Verbose "---------Request---------"
+            Write-Verbose $body
+            Write-Verbose "---------Reqest---------"
+
+            if (-Not $WhatIfPreference)
+            {
+                $response = Invoke-RestMethod $apiUrl -Method POST -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)   
+            }
+            
+            Write-Verbose "---------INITIALIZE RESPONSE---------"
+            Write-Verbose ($response | ConvertTo-Json -Depth 50 | Out-String)
+            Write-Verbose "---------INITIALIZE RESPONSE---------"
+    
+        }
+
+        return $results
     }
     END {
         Write-Verbose "Leaving script $($MyInvocation.MyCommand.Name)"

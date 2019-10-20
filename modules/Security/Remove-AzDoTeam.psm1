@@ -36,12 +36,12 @@ function Remove-AzDoTeam()
     param
     (
         # Common Parameters
-        [PoshAzDo.AzDoConnectObject][parameter(ValueFromPipelinebyPropertyName = $true, ValueFromPipeline = $true)]$AzDoConnection,
-        [string]$ApiVersion = $global:AzDoApiVersion,
+        [parameter(Mandatory=$false, ValueFromPipeline=$true, ValueFromPipelinebyPropertyName=$true)][PoshAzDo.AzDoConnectObject]$AzDoConnection,
+        [parameter(Mandatory=$false)][string]$ApiVersion = $global:AzDoApiVersion,
 
         # Module Parameters
-        [Guid][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName = "Id")]$TeamId = [Guid]::Empty,
-        [string][parameter(ValueFromPipelinebyPropertyName = $true, ParameterSetName = "Name")]$TeamName
+        [parameter(Mandatory=$false, ParameterSetName = "Id", ValueFromPipelinebyPropertyName=$true)][Guid]$TeamId,
+        [parameter(Mandatory=$false, ParameterSetName = "Name")][string]$TeamName
     )
     BEGIN
     {
