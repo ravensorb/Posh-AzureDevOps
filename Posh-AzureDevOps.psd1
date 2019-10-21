@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.0.8'
+ModuleVersion = '1.0.9'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -167,7 +167,7 @@ PrivateData = @{
         IconUri = 'https://github.com/ravensorb/Posh-AzureDevOps'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Fixed a few issues with logging statements displaying incorrect details.`nAdded support for adding/removing library group security roles'
+        ReleaseNotes = 'Fixed a find/replace error that broke Get-AzDoVariableGroups'
 
         # Prerelease string of this module
         # Prerelease = ''

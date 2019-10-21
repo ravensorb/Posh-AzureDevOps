@@ -13,7 +13,7 @@ The name of the variable group to retrieve
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoresponse
+Get-AzDoVariableGroups
 
 .NOTES
 
@@ -21,7 +21,7 @@ Get-AzDoresponse
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoresponse()
+function Get-AzDoVariableGroups()
 {
     [CmdletBinding(
         DefaultParameterSetName="Name"
