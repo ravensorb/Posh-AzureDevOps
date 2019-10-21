@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.0.9'
+ModuleVersion = '1.0.10.2'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -85,6 +85,7 @@ NestedModules = @(
     '.\modules\Libraries\Remove-AzDoVariableGroupResourceAssignment.psm1',
     '.\modules\Libraries\Remove-AzDoVariableGroupVariable.psm1',
     '.\modules\Libraries\Remove-AzDoLibrarySecurityRole.psm1',
+    '.\modules\Libraries\Set-AzDoVariableGroupVariable.psm1',
     '.\modules\Libraries\Set-AzDoVariableGroupPermissionInheritance.psm1',
     '.\modules\Projects\Get-AzDoProjectDetails.psm1',
     '.\modules\Projects\Get-AzDoProjects.psm1',
@@ -167,7 +168,7 @@ PrivateData = @{
         IconUri = 'https://github.com/ravensorb/Posh-AzureDevOps'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Fixed a find/replace error that broke Get-AzDoVariableGroups'
+        ReleaseNotes = 'Added support for setting a specific library group variable value'
 
         # Prerelease string of this module
         # Prerelease = ''

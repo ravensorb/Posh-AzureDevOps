@@ -63,7 +63,7 @@ function Get-AzDoVariableGroups()
     }
     PROCESS
     {
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/response"
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups"
 
         $response = Invoke-RestMethod $apiUrl -Headers $AzDoConnection.HttpHeaders
         

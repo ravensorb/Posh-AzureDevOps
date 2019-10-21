@@ -31,7 +31,7 @@ Indicates if the variable group should be created if it doesn't exist
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Add-AzDoVariableGroupVariable -VariableGroupName <variable group name> -VariableName <variable name> -VariableValue <some value>
+Set-AzDoVariableGroupVariable -VariableGroupName <variable group name> -VariableName <variable name> -VariableValue <some value>
 
 .NOTES
 
@@ -39,7 +39,7 @@ Add-AzDoVariableGroupVariable -VariableGroupName <variable group name> -Variable
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Add-AzDoVariableGroupVariable()
+function Set-AzDoVariableGroupVariable()
 {
     [CmdletBinding(
         SupportsShouldProcess=$True
@@ -97,51 +97,36 @@ function Add-AzDoVariableGroupVariable()
 
         $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -eq $VariableGroupName -or $_.id -eq $VariableGroupId }
 
-        if($variableGroup)
+        if($null -eq $variableGroup)
         {
-            Write-Verbose "Variable group $VariableGroupName exists."
+            Write-Error "Variable group '$VariableGroupName' not found."
 
-            if ($Reset)
-            {
-                Write-Verbose "Reset = $Reset : remove all variables."
-                foreach($prop in $variableGroup.variables.PSObject.Properties.Where{$_.MemberType -eq "NoteProperty"})
-                {
-                    $variableGroup.variables.PSObject.Properties.Remove($prop.Name)
-                }
-            }
-
-            $id = $variableGroup.id
-            $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups/$($id)"
-            $method = "Put"
-        }
-        else
-        {
-            Write-Verbose "Variable group $VariableGroupName not found."
-            if ($Force)
-            {
-                Write-Verbose "Create variable group $VariableGroupName."
-                $variableGroup = @{name=$VariableGroupName;description=$VariableGroupDescription;variables=New-Object PSObject;}
-                $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups"
-            }
-            else
-            {
-                Write-Error -ErrorAction $errorPreference -Message "Cannot add variable to nonexisting variable group $VariableGroupName; use the -Force switch to create the variable group."
-            }
+            return
         }
 
-        Write-Verbose "Adding $VariableName with value $VariableValue..."
-        $variableGroup.variables | Add-Member -Name $VariableName -MemberType NoteProperty -Value @{value=$VariableValue;isSecret=$Secret} -Force
+        $variable = $variableGroup.variables.PSObject.Properties | ? { $_.name -eq $VariableName }
+
+        if ($null -eq $variable)
+        {
+            Write-Error "Variable '$VariableName' not found."
+
+            return
+        }
+
+        $variable.value = $VariableValue
 
         #Write-Verbose "Persist variable group $VariableGroupName."
-        $body = $variableGroup | ConvertTo-Json -Depth 10 -Compress
+        $body = $variableGroup | ConvertTo-Json -Depth 50 -Compress
 
         Write-Verbose "---------BODY---------"
         Write-Verbose $body
         Write-Verbose "---------BODY---------"
 
+        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups/$($variableGroup.id)"
+
         if (-Not $WhatIfPreference) 
         {
-            $response = Invoke-RestMethod $apiUrl -Method $method -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
+            $response = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
         }
         
         Write-Verbose "---------RESPONSE---------"
