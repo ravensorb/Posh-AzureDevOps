@@ -1,10 +1,10 @@
 <#
 
 .SYNOPSIS
-Add/Replace a new variable to a specific Azure DevOps libary
+Resets a specific Azure DevOps Variable Group
 
 .DESCRIPTION
-The command will add/replace a variable to the specificed variable group
+The command will clear our an azure DevOps Variable grou
 
 .PARAMETER VariableGroupName
 The name of the variable group to create/update (optional)
@@ -12,23 +12,17 @@ The name of the variable group to create/update (optional)
 .PARAMETER VariableGroupId
 A id for the variable group (optional)
 
-.PARAMETER VariableName
+.PARAMETER InitalVariableName
 Tha name of the variable to create/update
 
-.PARAMETER VariableValue
+.PARAMETER InitalVariableValue
 The variable for the variable
-
-.PARAMETER Secret
-Indicates if the vaule should be stored as a "secret"
-
-.PARAMETER Force
-Indicates if the variable should be updated even if it exists
 
 .PARAMETER ApiVersion
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Add-AzDoVariableGroupVariable -VariableGroupName <variable group name> -VariableName <variable name> -VariableValue <some value>
+Reset-AzDoVariableGroup -VariableGroupName <variable group name> -InitalVariableName <variable name> -InitalVariableValue <some value>
 
 .NOTES
 
@@ -36,11 +30,10 @@ Add-AzDoVariableGroupVariable -VariableGroupName <variable group name> -Variable
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Add-AzDoVariableGroupVariable()
+function Reset-AzDoVariableGroup()
 {
     [CmdletBinding(
-        SupportsShouldProcess=$True,
-        DefaultParameterSetName="Name"
+        SupportsShouldProcess=$True
     )]
     param
     (
@@ -51,11 +44,9 @@ function Add-AzDoVariableGroupVariable()
         # Module Parameters
         [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true, ParameterSetName="Name")][string]$VariableGroupName,
         [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true, ParameterSetName="ID")][string]$VariableGroupId,
-
-        [parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)][string]$VariableName,
-        [parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)][string]$VariableValue,
-        [parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)][bool]$Secret,
-        [parameter(Mandatory=$false)][switch]$Force
+        [parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)][string]$InitalVariableName = "CreatedOn",
+        [parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)][string]$InitalVariableValue = (Get-Date).ToString(),
+        [parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)][bool]$Secret
     )
     BEGIN
     {
@@ -86,46 +77,34 @@ function Add-AzDoVariableGroupVariable()
     }
     PROCESS
     {
+        $method = "POST"
+
         if ([string]::IsNullOrEmpty($VariableGroupName) -and [string]::IsNullOrEmpty($VariableGroupId))
         {
             Write-Error -ErrorAction $errorPreference -Message "Specify either Variable Group Name or Variable Group Id"
-        }
 
-        $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -eq $VariableGroupName -or $_.id -eq $VariableGroupId }
-        
-        if ($null -eq $variableGroup)
-        {
-            Write-Error -ErrorAction $errorPreference -Message "Variable group '$($VariableGroupName)' not found..."
-            
             return
         }
 
-        $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups/$($variableGroup.id)"
+        $variableGroup = Get-AzDoVariableGroups -AzDoConnection $AzDoConnection | ? { $_.name -eq $VariableGroupName -or $_.id -eq $VariableGroupId }
 
-        $variable = $variableGroup.variables.PSObject.Properties | ? { $_.MemberType -eq "NoteProperty" -and $_.Name -eq $VariableName }
-       
-        Write-Verbose "---------VARIABLE---------"
-        Write-Verbose $variable | ConvertTo-Json -Depth 50 | Out-String
-        Write-Verbose "---------VARIABLE---------"
-
-        if ($null -ne $variable) 
+        if ($null -eq $variableGroup)
         {
-            if ($Force)
-            {
-                $variable.value = $VariableValue
-            } 
-            else 
-            {
-                Write-Error -ErrorAction $errorPreference -Message "Variable '$($VariableName)' already exists in group '$($VariableGroupName)'"
+            Write-Error -ErrorAction $errorPreference -Message "Specified variabl group '$($VariableGroupName) does not exist..."
 
-                return
-            }
-        } 
-        else 
-        {
-            Write-Verbose "Adding '$VariableName' with value '$VariableValue'..."
-            $variableGroup.variables | Add-Member -Name $VariableName -MemberType NoteProperty -Value @{value=$VariableValue;isSecret=$Secret} -Force
+            return
         }
+
+        Write-Verbose "Variable group $VariableGroupName exists."
+
+        Write-Verbose "Reset = $Reset : remove all variables."
+        foreach($prop in $variableGroup.variables.PSObject.Properties.Where{$_.MemberType -eq "NoteProperty"})
+        {
+            $variableGroup.variables.PSObject.Properties.Remove($prop.Name)
+        }
+
+        Write-Verbose "Adding $VariableName with value $VariableValue..."
+        $variableGroup.variables | Add-Member -Name $InitalVariableName -MemberType NoteProperty -Value @{value=$InitalVariableValue;isSecret=$Secret} -Force
 
         #Write-Verbose "Persist variable group $VariableGroupName."
         $body = $variableGroup | ConvertTo-Json -Depth 50 -Compress
@@ -136,7 +115,7 @@ function Add-AzDoVariableGroupVariable()
 
         if (-Not $WhatIfPreference) 
         {
-            $response = Invoke-RestMethod $apiUrl -Method PUT -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
+            $response = Invoke-RestMethod $apiUrl -Method $method -Body $body -ContentType 'application/json' -Header $($AzDoConnection.HttpHeaders)
         }
         
         Write-Verbose "---------RESPONSE---------"

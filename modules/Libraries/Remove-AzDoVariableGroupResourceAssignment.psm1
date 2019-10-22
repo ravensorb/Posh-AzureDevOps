@@ -101,13 +101,13 @@ function Remove-AzDoVariableGroupResourceAssignment()
             if ($_.access -ne "assigned") 
             {   
                 Write-Verbose ($_ | ConvertTo-Json | Out-String )
-                Write-Warning "`tGroup Access is: '$($_.access)'.  Should be 'Assigned'. This might be an issue."
+                Write-Warning "`tUser '$($_.identity.displayName)' access to '$($VariableGroupName)' is '$($_.access)'.  It should be 'Assigned'. This might be an issue."
             }
             
             $assignmentsToDelete += $_.identity.id
         }
 
-        $body = $assignmentsToDelete | ConvertTo-Json -Depth 10 -Compress
+        $body = $assignmentsToDelete | ConvertTo-Json -Depth 50 -Compress
         $body = $body.Replace("`"`",","")
 
         Write-Verbose "---------BODY---------"

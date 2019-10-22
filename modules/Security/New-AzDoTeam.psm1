@@ -78,7 +78,7 @@ function New-AzDoTeam()
         # }
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.OrganizationUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/projects/$($AzDoConnection.ProjectName)/teams" -QueryStringParams $apiParams
         $teamDetails = @{name=$TeamName; description=$TeamDescription}
-        $body = $teamDetails | ConvertTo-Json -Depth 10 -Compress
+        $body = $teamDetails | ConvertTo-Json -Depth 50 -Compress
 
         Write-Verbose "---------BODY---------"
         Write-Verbose $body

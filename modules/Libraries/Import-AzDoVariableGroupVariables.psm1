@@ -94,8 +94,26 @@ function Import-AzDoVariableGroupVariables()
         #$variables 
         Write-Verbose "Creating Variables in Group $VariableGroupName"
 
+        $existingVariableGroup = Get-AzDoVariableGroups | ? { $_.displayName -eq $VariableGroupName }
+        if ($null -ne $existingVariableGroup)
+        {
+            if ($Reset) {
+                if (-Not $WhatIfPreference) 
+                {
+                    Reset-AzDoVariableGroup -VariableGroupName $($existingVariableGroup.displayName) | Out-Null
+                }
+            }
+        } elseif ($Force) {
+            if (-Not $WhatIfPreference)
+            {
+                New-AzDoVariableGroup -VariableGroupName $($existingVariableGroup.displayName) | Out-Null
+            }
+        }
+
         # Note: We only want to run the reset once no matter what so we clear it after the first loop
-        $variables | % { Add-AzDoVariableGroupVariable -AzDoConnection $AzDoConnection -ApiVersion $ApiVersion -VariableGroupName $VariableGroupName -VariableName $($_.Name) -VariableValue $($_.Value) -Secret $($_.Secret) -Force:$Force -Reset:$Reset; $Reset = $null; $Force = $null }       
+        $variables | % { 
+            Add-AzDoVariableGroupVariable -VariableGroupName $VariableGroupName -VariableName $($_.Name) -VariableValue $($_.Value) -Secret $($_.Secret)  
+        }       
 
         Write-Host "`tImported $($variables.Count) variables" -ForegroundColor Green
     }

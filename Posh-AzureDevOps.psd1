@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.0.10.2'
+ModuleVersion = '1.0.10.3'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -85,6 +85,7 @@ NestedModules = @(
     '.\modules\Libraries\Remove-AzDoVariableGroupResourceAssignment.psm1',
     '.\modules\Libraries\Remove-AzDoVariableGroupVariable.psm1',
     '.\modules\Libraries\Remove-AzDoLibrarySecurityRole.psm1',
+    '.\modules\Libraries\Reset-AzDoVariableGroup.psm1',
     '.\modules\Libraries\Set-AzDoVariableGroupVariable.psm1',
     '.\modules\Libraries\Set-AzDoVariableGroupPermissionInheritance.psm1',
     '.\modules\Projects\Get-AzDoProjectDetails.psm1',

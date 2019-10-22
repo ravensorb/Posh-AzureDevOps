@@ -37,7 +37,9 @@ function New-AzDoVariableGroup()
 
         # Module Parameters
         [parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)][string]$VariableGroupName,
-        [parameter(Mandatory=$false)][string]$Description
+        [parameter(Mandatory=$false)][string]$VariableGroupDescription,
+        [parameter(Mandatory=$false)][string]$InitalVariableName = "CreatedOn",
+        [parameter(Mandatory=$false)][string]$InitalVariableValue = (Get-Date).ToString()
     )
     BEGIN
     {
@@ -83,13 +85,13 @@ function New-AzDoVariableGroup()
 
         Write-Verbose "Create variable group $VariableGroupName."
 
-        $variableGroup = @{name=$VariableGroupName;description=$Description;variables=New-Object PSObject;}
+        $variableGroup = @{name=$VariableGroupName;description=$VariableGroupDescription;variables=New-Object PSObject;}
         $apiUrl = Get-AzDoApiUrl -RootPath $($AzDoConnection.ProjectUrl) -ApiVersion $ApiVersion -BaseApiPath "/_apis/distributedtask/variablegroups"
 
-        $variableGroup.variables | Add-Member -Name "NewVariable1" -MemberType NoteProperty -Value @{value="";isSecret=$false} -Force
+        $variableGroup.variables | Add-Member -Name $InitalVariableName -MemberType NoteProperty -Value @{value=$InitalVariableValue;isSecret=$false} -Force
 
         #Write-Verbose "Persist variable group $VariableGroupName."
-        $body = $variableGroup | ConvertTo-Json -Depth 10 -Compress
+        $body = $variableGroup | ConvertTo-Json -Depth 50 -Compress
 
         Write-Verbose "---------BODY---------"
         Write-Verbose $body

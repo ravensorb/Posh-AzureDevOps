@@ -84,7 +84,7 @@ function New-AzDoSecurityGroup()
         $body = ConvertFrom-Json "{'name':'$($GroupName)', 'description': '$($GroupDescription)'}"
 
         $groupDetails = @{displayName=$GroupName;description=$GroupDescription}
-        $body = $groupDetails | ConvertTo-Json -Depth 10 -Compress
+        $body = $groupDetails | ConvertTo-Json -Depth 50 -Compress
 
         Write-Verbose "---------BODY---------"
         Write-Verbose $body

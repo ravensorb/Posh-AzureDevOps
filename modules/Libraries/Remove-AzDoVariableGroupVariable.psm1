@@ -109,7 +109,7 @@ function Remove-AzDoVariableGroupVariable()
         }
 
         #Write-Verbose "Persist variable group $VariableGroupName."
-        $body = $variableGroup | ConvertTo-Json -Depth 10 -Compress
+        $body = $variableGroup | ConvertTo-Json -Depth 50 -Compress
 
         Write-Verbose "---------BODY---------"
         Write-Verbose $body

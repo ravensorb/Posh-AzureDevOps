@@ -80,7 +80,7 @@ function Remove-AzDoLibrarySecurityRole()
         $body = "[`"$($userOrGroup.originId)`"]"
         # $roleDetails = @()
         # $roleDetails += @{roleName=$RoleName;userId=$($userOrGroup.originId)}
-        # $body = $roleDetails | ConvertTo-Json -Depth 10 -Compress
+        # $body = $roleDetails | ConvertTo-Json -Depth 50 -Compress
 
         Write-Verbose "---------BODY---------"
         Write-Verbose $body

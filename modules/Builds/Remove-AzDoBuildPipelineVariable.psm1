@@ -110,7 +110,7 @@ function Remove-AzDoBuildPipelineVariable()
         #$definition.source = "restApi"
 
         #Write-Verbose "Persist definition $definition."
-        $body = $definition | ConvertTo-Json -Depth 10 -Compress
+        $body = $definition | ConvertTo-Json -Depth 50 -Compress
 
         Write-Verbose "---------BODY---------"
         Write-Verbose $body

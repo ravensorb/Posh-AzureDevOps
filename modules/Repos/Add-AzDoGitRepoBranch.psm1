@@ -104,7 +104,7 @@ function Add-AzDoGitRepoBranch()
 
         # [{"name":"refs/heads/dev","newObjectId":"4aac2e2e07837b2c5e7e298c7167ca05cb5415e1","oldObjectId":"0000000000000000000000000000000000000000"}]
         $data = @(@{name="refs/heads/$($NewBranchName)";newObjectId="$($existingBasedOnBranch.objectid)";oldObjectId="0000000000000000000000000000000000000000"})
-        $body = $data | ConvertTo-Json -Depth 10 -Compress
+        $body = $data | ConvertTo-Json -Depth 50 -Compress
         $body = "[$($body)]"
 
         Write-Verbose "---------Request---------"

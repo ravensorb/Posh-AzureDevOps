@@ -134,7 +134,7 @@ function Add-AzDoBuildPipelineVariable()
 
         #$definition.source = "restApi"
 
-        $body = $definition | ConvertTo-Json -Depth 10 -Compress
+        $body = $definition | ConvertTo-Json -Depth 50 -Compress
 
         Write-Verbose "---------BODY---------"
         Write-Verbose $body

@@ -53,10 +53,11 @@ function Set-AzDoVariableGroupVariable()
         # Module Parameters
         [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true, ParameterSetName="Name")][string]$VariableGroupName,
         [parameter(Mandatory=$true, ValueFromPipelinebyPropertyName=$true, ParameterSetName="ID")][string]$VariableGroupId,
+
         [parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)][string]$VariableName,
         [parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)][string]$VariableValue,
         [parameter(Mandatory=$false, ValueFromPipelineByPropertyName=$true)][bool]$Secret,
-        [parameter(Mandatory=$false)][switch]$Reset,
+
         [parameter(Mandatory=$false)][switch]$Force
     )
     BEGIN
@@ -88,8 +89,6 @@ function Set-AzDoVariableGroupVariable()
     }
     PROCESS
     {
-        $method = "POST"
-
         if ([string]::IsNullOrEmpty($VariableGroupName) -and [string]::IsNullOrEmpty($VariableGroupId))
         {
             Write-Error -ErrorAction $errorPreference -Message "Specify either Variable Group Name or Variable Group Id"
@@ -106,14 +105,22 @@ function Set-AzDoVariableGroupVariable()
 
         $variable = $variableGroup.variables.PSObject.Properties | ? { $_.name -eq $VariableName }
 
-        if ($null -eq $variable)
+        if ($null -ne $variable)
         {
-            Write-Error "Variable '$VariableName' not found."
-
-            return
+            $variable.value = $VariableValue
         }
+        else 
+        {
+            if (-Not $Force)
+            {
+                Write-Error -ErrorAction $errorPreference -Message "Variable '$VariableName' not found."
 
-        $variable.value = $VariableValue
+                return
+            }
+
+            $variableGroup.variables | Add-Member -Name $VariableName -MemberType NoteProperty -Value @{value=$VariableValue;isSecret=$Secret} -Force
+
+        }
 
         #Write-Verbose "Persist variable group $VariableGroupName."
         $body = $variableGroup | ConvertTo-Json -Depth 50 -Compress

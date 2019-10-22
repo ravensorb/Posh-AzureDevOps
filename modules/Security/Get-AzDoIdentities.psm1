@@ -97,7 +97,7 @@ function Get-AzDoIdentities()
             properties=@("DisplayName", "IsMru", "ScopeName", "SamAccountName", "Active", "SubjectDescriptor", "Department", "JobTitle", "Mail", "MailNickname", "PhysicalDeliveryOfficeName", "SignInAddress", "Surname", "Guest", "TelephoneNumber", "Manager", "Description")
         }
 
-        $body = $query | ConvertTo-Json -Depth 10 -Compress
+        $body = $query | ConvertTo-Json -Depth 50 -Compress
 
         Write-Verbose $body
 

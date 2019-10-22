@@ -72,7 +72,7 @@ function New-AzDoGitRepo()
         #   }
         # }
         $data = @{name=$Name;project=@{id=$AzDoConnection.ProjectId}}
-        $body = $data | ConvertTo-Json -Depth 10 -Compress
+        $body = $data | ConvertTo-Json -Depth 50 -Compress
 
         Write-Verbose "---------Request---------"
         Write-Verbose $body
