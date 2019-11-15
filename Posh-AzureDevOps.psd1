@@ -12,7 +12,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '1.0.10.3'
+ModuleVersion = '1.0.10.4'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -169,7 +169,7 @@ PrivateData = @{
         IconUri = 'https://github.com/ravensorb/Posh-AzureDevOps'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Added support for setting a specific library group variable value'
+        ReleaseNotes = 'Bug fixes'
 
         # Prerelease string of this module
         # Prerelease = ''

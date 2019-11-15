@@ -57,7 +57,7 @@ function Add-AzDoGitRepoBranch()
 
         if (-Not (Test-Path variable:ApiVersion) -or $ApiVersion -ne "4.1") { $ApiVersion = "4.1"}
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
             $AzDoConnection = Get-AzDoActiveConnection
 

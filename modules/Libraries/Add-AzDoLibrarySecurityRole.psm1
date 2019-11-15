@@ -55,7 +55,7 @@ function Add-AzDoLibrarySecurityRole()
         if ((-Not (Test-Path variable:ApiVersion)) -or $ApiVersion -ne "6.0-preview") { $ApiVersion = "6.0-preview" }
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "6.0-preview" }
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
@@ -73,7 +73,7 @@ function Add-AzDoLibrarySecurityRole()
 
         if ($null -eq $userOrGroup)
         {
-            Write-Error -ErrorAction $errorPreference -Message "User/Group/Team not found"
+            Write-Error -ErrorAction $errorPreference -Message "User/Group/Team '$UserOrGroupName' not found"
             return
         }
 

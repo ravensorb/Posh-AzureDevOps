@@ -13,7 +13,7 @@ The name of the variable group to retrieve
 Allows for specifying a specific version of the api to use (default is 5.0)
 
 .EXAMPLE
-Get-AzDoVariableGroups -VariableGroupName <variable group name>
+Get-AzDoVariableGroupResourceAssignments -VariableGroupName <variable group name>
 
 .NOTES
 
@@ -21,7 +21,7 @@ Get-AzDoVariableGroups -VariableGroupName <variable group name>
 https://github.com/ravensorb/Posh-AzureDevOps
 
 #>
-function Get-AzDoVariableGroups()
+function Get-AzDoVariableGroupResourceAssignments()
 {
     [CmdletBinding(
         DefaultParameterSetName="Name"
@@ -51,7 +51,7 @@ function Get-AzDoVariableGroups()
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.1-preview" }
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.1-preview" }
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
             $AzDoConnection = Get-AzDoActiveConnection
 

@@ -55,7 +55,7 @@ function Add-AzDoVariableGroupResourceAssignment()
         if (-Not (Test-Path variable:ApiVersion)) { $ApiVersion = "5.1-preview" }
         if (-Not $ApiVersion.Contains("preview")) { $ApiVersion = "5.1-preview" }
 
-        if (-Not (Test-Path varaible:$AzDoConnection) -and $AzDoConnection -eq $null)
+        if (-Not (Test-Path varaible:$AzDoConnection) -and $null -eq $AzDoConnection)
         {
             $AzDoConnection = Get-AzDoActiveConnection
 
@@ -83,11 +83,19 @@ function Add-AzDoVariableGroupResourceAssignment()
             return
         }
 
-        $userOrGroup = Get-AzDoIdentities -AzDoConnection $AzDoConnection -QueryString $UserOrGroupName
+        # If we already have a project qualified query string lets just use that
+        if ($UserOrGroupName.StartsWith("["))
+        {
+            $userOrGroup = Get-AzDoIdentities -AzDoConnection $AzDoConnection -QueryString "$UserOrGroupName"
+        }
+        else 
+        {
+            $userOrGroup = Get-AzDoIdentities -AzDoConnection $AzDoConnection -QueryString "[$($AzDoConnection.ProjectName)]\$UserOrGroupName"
+        }
 
         if ($null -eq $userOrGroup)
         {
-            Write-Error -ErrorAction $errorPreference -Message "User/Group/Team not found"
+            Write-Error -ErrorAction $errorPreference -Message "User/Group/Team '$UserOrGroupName' not found"
             return
         }
 
