@@ -15,6 +15,9 @@ The organziation url to connect to, Ex: https://dev.auzre.com/<org>
 .PARAMETER ProjectName
 Then name of the project to connect to
 
+.PARAMETER Force
+Force a reconnection
+
 .PARAMETER PAT
 The Personal Access Toen (PAT) to use for authentication
 
@@ -39,7 +42,8 @@ function Connect-AzDo()
         [string][parameter(ParameterSetName = "OrgUrlAndProjectName", Mandatory = $true, ValueFromPipelineByPropertyName)]$ProjectName,
         [string][parameter(Mandatory = $false, ValueFromPipelinebyPropertyName=$true)]$PAT,
         [string][Parameter(DontShow)]$OAuthToken,
-        [switch][parameter(DontShow)]$LocalOnly
+        [switch][parameter(DontShow)]$LocalOnly,
+        [switch]$Force
     )
     BEGIN
     {
@@ -59,6 +63,11 @@ function Connect-AzDo()
     }
     PROCESS
     {
+        if ($Force) 
+        {
+            $Global:AzDoActiveConnection = $null
+        }
+
         if (-Not [string]::IsNullOrEmpty($ProjectUrl))
         {
             $azdoConnection = [PoshAzDo.AzDoConnectObject]::CreateFromUrl($ProjectUrl)
